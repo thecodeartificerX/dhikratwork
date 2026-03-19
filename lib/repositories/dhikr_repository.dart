@@ -52,6 +52,13 @@ class DhikrRepository {
     return List.unmodifiable(rows.map(Dhikr.fromMap).toList());
   }
 
+  /// Returns all dhikrs whose [id] is in [ids], preserving input order.
+  Future<List<Dhikr>> getByIds(List<int> ids) async {
+    if (ids.isEmpty) return const [];
+    final all = await getAll();
+    return List.unmodifiable(all.where((d) => ids.contains(d.id)).toList());
+  }
+
   /// Returns all dhikrs where [isHidden] is false.
   Future<List<Dhikr>> getVisible() async {
     final rows = await _db.query(

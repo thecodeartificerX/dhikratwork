@@ -66,6 +66,12 @@ class FakeDhikrRepository implements DhikrRepository {
   }
 
   @override
+  Future<List<Dhikr>> getByIds(List<int> ids) async {
+    if (ids.isEmpty) return const [];
+    return List.unmodifiable(_dhikrs.where((d) => ids.contains(d.id)).toList());
+  }
+
+  @override
   Future<List<Dhikr>> getByCategory(String category) async {
     return List.unmodifiable(
       _dhikrs.where((d) => d.category == category).toList(),

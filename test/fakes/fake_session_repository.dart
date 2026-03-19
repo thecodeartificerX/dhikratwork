@@ -8,6 +8,21 @@ class FakeSessionRepository implements SessionRepository {
   final List<DhikrSession> _sessions = [];
   int _nextId = 1;
 
+  /// Pre-populate today-dated sessions for [dhikrId] with individual count=1
+  /// sessions summing to [count]. This matches getTodaySessionCount semantics.
+  void seedTodayCount(int dhikrId, int count) {
+    final now = DateTime.now().toIso8601String();
+    for (int i = 0; i < count; i++) {
+      _sessions.add(DhikrSession(
+        id: _nextId++,
+        dhikrId: dhikrId,
+        count: 1,
+        startedAt: now,
+        source: 'test',
+      ));
+    }
+  }
+
   /// Pre-populate with sessions for tests that need existing data.
   void seed(List<DhikrSession> sessions) {
     _sessions.clear();
