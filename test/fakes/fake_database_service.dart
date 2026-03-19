@@ -38,6 +38,11 @@ class FakeDatabaseService implements DatabaseService {
   bool get isOpen => true;
 
   @override
+  Future<List<String>> getTables() async {
+    return _store.keys.toList();
+  }
+
+  @override
   Future<Database> get database async =>
       throw UnimplementedError('FakeDatabaseService does not expose database.');
 

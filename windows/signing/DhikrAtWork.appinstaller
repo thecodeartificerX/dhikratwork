@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AppInstaller
+  xmlns="http://schemas.microsoft.com/appx/appinstaller/2017/2"
+  Version="1.0.0.0"
+  Uri="https://github.com/YOUR_ORG/dhikratwork/releases/latest/download/DhikrAtWork.appinstaller">
+
+  <MainPackage
+    Name="com.dhikratwork.app"
+    Version="1.0.0.0"
+    Publisher="CN=DhikrAtWork"
+    Uri="https://github.com/YOUR_ORG/dhikratwork/releases/latest/download/dhikratwork.msix"
+    ProcessorArchitecture="x64" />
+
+  <UpdateSettings>
+    <OnLaunch
+      HoursBetweenUpdateChecks="12"
+      ShowPrompt="true"
+      UpdateBlocksActivation="false" />
+    <AutomaticBackgroundTask />
+    <ForceUpdateFromAnyVersion>false</ForceUpdateFromAnyVersion>
+  </UpdateSettings>
+
+</AppInstaller>

@@ -727,6 +727,16 @@ class DatabaseService {
   // Utility
   // ---------------------------------------------------------------------------
 
+  /// Returns a list of all non-system table names in the database.
+  /// Used by integration tests to verify schema creation.
+  Future<List<String>> getTables() async {
+    final db = await database;
+    final rows = await db.rawQuery(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
+    );
+    return rows.map((r) => r['name'] as String).toList();
+  }
+
   Future<void> close() async {
     final db = _database;
     if (db != null) {

@@ -53,6 +53,28 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   msix: ^3.16.8
 
+msix_config:
+  display_name: DhikrAtWork
+  publisher_display_name: DhikrAtWork
+  identity_name: com.dhikratwork.app
+  msix_version: 1.0.0.0
+  logo_path: assets/icons/app_icon.png
+  start_menu_icon_path: assets/icons/app_icon.png
+  tile_icon_path: assets/icons/app_icon.png
+  icons_background_color: transparent
+  architecture: x64
+  capabilities: internetClient
+  certificate_path: windows/signing/CERTIFICATE.pfx
+  certificate_password: YOUR_CERT_PASSWORD
+  install_certificate: false
+  app_installer:
+    hours_between_update_checks: 12
+    automatic_background_task: true
+    update_blocks_activation: false
+    show_prompt: true
+    force_update_from_any_version: false
+    uri: https://github.com/YOUR_ORG/dhikratwork/releases/latest/download/DhikrAtWork.appinstaller
+
 flutter:
   uses-material-design: true
   assets:
