@@ -56,6 +56,18 @@ LogicalKeyboardKey? _parseLogicalKey(String label) {
     'x' => LogicalKeyboardKey.keyX,
     'y' => LogicalKeyboardKey.keyY,
     'z' => LogicalKeyboardKey.keyZ,
+    'f1' => LogicalKeyboardKey.f1,
+    'f2' => LogicalKeyboardKey.f2,
+    'f3' => LogicalKeyboardKey.f3,
+    'f4' => LogicalKeyboardKey.f4,
+    'f5' => LogicalKeyboardKey.f5,
+    'f6' => LogicalKeyboardKey.f6,
+    'f7' => LogicalKeyboardKey.f7,
+    'f8' => LogicalKeyboardKey.f8,
+    'f9' => LogicalKeyboardKey.f9,
+    'f10' => LogicalKeyboardKey.f10,
+    'f11' => LogicalKeyboardKey.f11,
+    'f12' => LogicalKeyboardKey.f12,
     _ => null,
   };
 }
