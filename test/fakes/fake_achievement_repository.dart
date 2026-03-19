@@ -39,8 +39,37 @@ class FakeAchievementRepository implements AchievementRepository {
     return List.unmodifiable(result);
   }
 
+  // ---------------------------------------------------------------------------
+  // Phase 5 additions — GamificationViewModel test helpers
+  // ---------------------------------------------------------------------------
+
+  /// Keys pre-marked as unlocked without going through [unlock]. Used to
+  /// simulate already-unlocked achievements in tests.
+  Set<String> preUnlockedKeys = {};
+
+  /// Tracks how many times [unlock] has been called for each key.
+  final Map<String, int> _unlockCalls = {};
+
+  /// Returns the set of keys that are currently unlocked (both via store and
+  /// via [preUnlockedKeys]).
+  Set<String> get unlockedKeys {
+    final allUnlocked = _store.values
+        .where((a) => a.unlockedAt != null)
+        .map((a) => a.key)
+        .toSet();
+    return {...preUnlockedKeys, ...allUnlocked};
+  }
+
+  /// Returns how many times [unlock] was called for [key].
+  int unlockCallCount(String key) => _unlockCalls[key] ?? 0;
+
   @override
   Future<void> unlock(String key) async {
+    // Track calls for test assertions (only for non-pre-unlocked keys).
+    if (!preUnlockedKeys.contains(key)) {
+      _unlockCalls[key] = (_unlockCalls[key] ?? 0) + 1;
+    }
+    // Idempotent: only set timestamp when unlocked_at is still null.
     final existing = _store[key];
     if (existing == null || existing.unlockedAt != null) return;
     _store[key] = Achievement(

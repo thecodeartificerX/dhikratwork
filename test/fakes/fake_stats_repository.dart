@@ -97,4 +97,15 @@ class FakeStatsRepository implements StatsRepository {
 
   /// Test helper — clear all data.
   void clear() => _store.clear();
+
+  // ---------------------------------------------------------------------------
+  // Phase 5 additions — ViewModel test helpers
+  // ---------------------------------------------------------------------------
+
+  /// Tracks the last period string passed to any method (for assertions).
+  String? lastLoadedPeriod;
+
+  /// Stubbed count returned by getTotalCountForDhikr/getTotalCountForDate
+  /// when no seeded summaries exist (override for specific tests).
+  int stubbedCurrentPeriodCount = 0;
 }

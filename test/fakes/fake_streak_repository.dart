@@ -13,11 +13,30 @@ class FakeStreakRepository implements StreakRepository {
     lastActiveDate: null,
   );
 
+  // ---------------------------------------------------------------------------
+  // Phase 5 additions — GamificationViewModel test helpers
+  // ---------------------------------------------------------------------------
+
+  /// When non-zero, [getStreak] returns a synthetic streak with these values
+  /// instead of [_streak]. Set to 0 to use the seeded [_streak].
+  int stubbedCurrentStreak = 0;
+  int stubbedLongestStreak = 0;
+
   /// Override the initial streak for tests that need specific state.
   void seed(Streak streak) => _streak = streak;
 
   @override
-  Future<Streak> getStreak() async => _streak;
+  Future<Streak> getStreak() async {
+    if (stubbedCurrentStreak != 0 || stubbedLongestStreak != 0) {
+      return Streak(
+        id: kSingleRowId,
+        currentStreak: stubbedCurrentStreak,
+        longestStreak: stubbedLongestStreak,
+        lastActiveDate: null,
+      );
+    }
+    return _streak;
+  }
 
   @override
   Future<void> updateStreak(String todayDate) async {

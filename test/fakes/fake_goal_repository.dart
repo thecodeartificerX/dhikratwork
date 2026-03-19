@@ -8,6 +8,27 @@ class FakeGoalRepository implements GoalRepository {
   final Map<int, Goal> _store = {};
   int _nextId = 1;
 
+  // ---------------------------------------------------------------------------
+  // Phase 5 additions — GoalViewModel test helpers
+  // ---------------------------------------------------------------------------
+
+  /// When non-empty, [getActiveGoals] returns this list instead of reading
+  /// from [_store]. Used to control what the ViewModel loads.
+  List<Goal> stubbedGoals = [];
+
+  /// Tracks all goals passed to [add] (for assertions in GoalViewModel tests).
+  final List<Goal> savedGoals = [];
+
+  /// Tracks all ids passed to [delete] (for assertions in GoalViewModel tests).
+  final List<int> deletedIds = [];
+
+  /// Tracks all ids passed to [deactivate] (for assertions in GoalViewModel tests).
+  final List<int> deactivatedIds = [];
+
+  // ---------------------------------------------------------------------------
+  // GoalRepository interface
+  // ---------------------------------------------------------------------------
+
   @override
   Future<List<Goal>> getAll() async =>
       List.unmodifiable(_store.values.toList());
@@ -17,6 +38,7 @@ class FakeGoalRepository implements GoalRepository {
 
   @override
   Future<int> add(Goal goal) async {
+    savedGoals.add(goal);
     final id = _nextId++;
     _store[id] = Goal(
       id: id,
@@ -36,10 +58,14 @@ class FakeGoalRepository implements GoalRepository {
   }
 
   @override
-  Future<void> delete(int id) async => _store.remove(id);
+  Future<void> delete(int id) async {
+    deletedIds.add(id);
+    _store.remove(id);
+  }
 
   @override
   Future<void> deactivate(int id) async {
+    deactivatedIds.add(id);
     final existing = _store[id];
     if (existing == null) return;
     _store[id] = Goal(
@@ -54,6 +80,9 @@ class FakeGoalRepository implements GoalRepository {
 
   @override
   Future<List<Goal>> getActiveGoals() async {
+    // When stubbedGoals is non-empty, return that list; otherwise fall back
+    // to the in-memory store so seed() + getActiveGoals() also works.
+    if (stubbedGoals.isNotEmpty) return List.from(stubbedGoals);
     final result = _store.values.where((g) => g.isActive).toList();
     return List.unmodifiable(result);
   }

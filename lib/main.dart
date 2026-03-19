@@ -11,11 +11,17 @@ import 'package:dhikratwork/repositories/session_repository.dart';
 import 'package:dhikratwork/repositories/stats_repository.dart';
 import 'package:dhikratwork/repositories/streak_repository.dart';
 import 'package:dhikratwork/repositories/achievement_repository.dart';
+import 'package:dhikratwork/repositories/goal_repository.dart';
 import 'package:dhikratwork/repositories/settings_repository.dart';
 import 'package:dhikratwork/services/database_service.dart';
+import 'package:dhikratwork/services/subscription_service.dart';
 import 'package:dhikratwork/viewmodels/counter_viewmodel.dart';
 import 'package:dhikratwork/viewmodels/dhikr_library_viewmodel.dart';
 import 'package:dhikratwork/viewmodels/dashboard_viewmodel.dart';
+import 'package:dhikratwork/viewmodels/settings_viewmodel.dart';
+import 'package:dhikratwork/viewmodels/stats_viewmodel.dart';
+import 'package:dhikratwork/viewmodels/gamification_viewmodel.dart';
+import 'package:dhikratwork/viewmodels/goal_viewmodel.dart';
 import 'package:dhikratwork/views/shared/subscription_prompt.dart';
 
 void main() async {
@@ -35,6 +41,7 @@ void main() async {
   final streakRepo = StreakRepository(db);
   final achievementRepo = AchievementRepository(db);
   final settingsRepo = SettingsRepository(db);
+  final goalRepo = GoalRepository(db);
 
   runApp(
     MultiProvider(
@@ -65,6 +72,32 @@ void main() async {
             statsRepository: statsRepo,
             streakRepository: streakRepo,
             settingsRepository: settingsRepo,
+          ),
+        ),
+        // SettingsViewModel manages settings state and subscription verification.
+        ChangeNotifierProvider(
+          create: (_) => SettingsViewModel(
+            settingsRepository: settingsRepo,
+            dhikrRepository: dhikrRepo,
+            subscriptionService: FirestoreSubscriptionService(),
+          ),
+        ),
+        // Phase 5: Stats & Gamification ViewModels
+        ChangeNotifierProvider(
+          create: (_) => StatsViewModel(
+            statsRepository: statsRepo,
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => GamificationViewModel(
+            achievementRepository: achievementRepo,
+            streakRepository: streakRepo,
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => GoalViewModel(
+            goalRepository: goalRepo,
+            statsRepository: statsRepo,
           ),
         ),
       ],
