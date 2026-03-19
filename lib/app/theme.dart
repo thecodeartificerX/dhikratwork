@@ -1,24 +1,28 @@
-// lib/app/theme.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Earthy gold seed color — the central hue for the Islamic aesthetic palette.
-const Color _kSeedColor = Color(0xFFB8860B); // DarkGoldenrod
+/// Gold accent — the primary interactive/highlight color.
+const Color kGoldAccent = Color(0xFFE2C272);
 
-/// Returns the main [ThemeData] for DhikrAtWork.
-///
-/// Conventions:
-/// - Material 3 (default since Flutter 3.16, no explicit flag needed).
-/// - All component themes use [*ThemeData] suffix classes per skill.
-/// - Arabic text uses Amiri from google_fonts; Latin UI text uses Inter.
+/// Dark navy background — primary surface.
+const Color kDarkNavy = Color(0xFF16213E);
+
+/// Deeper navy — used for cards, containers, and secondary surfaces.
+const Color kDeepNavy = Color(0xFF0D1520);
+
+/// Returns the main dark [ThemeData] for DhikrAtWork.
 ThemeData buildAppTheme() {
   final colorScheme = ColorScheme.fromSeed(
-    seedColor: _kSeedColor,
-    brightness: Brightness.light,
+    seedColor: kGoldAccent,
+    brightness: Brightness.dark,
+    surface: kDarkNavy,
+    primary: kGoldAccent,
+    onPrimary: kDeepNavy,
   );
 
-  // Build text theme: Inter for Latin UI, Amiri for Arabic body
-  final baseTextTheme = GoogleFonts.interTextTheme();
+  final baseTextTheme = GoogleFonts.interTextTheme(
+    ThemeData(brightness: Brightness.dark).textTheme,
+  );
   final arabicTextStyle = GoogleFonts.amiri(
     fontSize: 22,
     height: 1.8,
@@ -27,11 +31,9 @@ ThemeData buildAppTheme() {
   );
 
   final textTheme = baseTextTheme.copyWith(
-    // Used for large Arabic text display (dhikr arabic_text)
     displayMedium: arabicTextStyle.copyWith(fontSize: 32, fontWeight: FontWeight.w600),
     displaySmall: arabicTextStyle.copyWith(fontSize: 26),
     headlineMedium: arabicTextStyle.copyWith(fontSize: 22),
-    // Standard Latin UI text inherits from Inter base
     bodyLarge: GoogleFonts.inter(fontSize: 16, color: colorScheme.onSurface),
     bodyMedium: GoogleFonts.inter(fontSize: 14, color: colorScheme.onSurface),
     bodySmall: GoogleFonts.inter(fontSize: 12, color: colorScheme.onSurfaceVariant),
@@ -47,10 +49,10 @@ ThemeData buildAppTheme() {
     colorScheme: colorScheme,
     textTheme: textTheme,
     useMaterial3: true,
+    scaffoldBackgroundColor: kDarkNavy,
 
-    // AppBar — no elevation, surface-colored background
     appBarTheme: AppBarThemeData(
-      backgroundColor: colorScheme.surface,
+      backgroundColor: kDarkNavy,
       foregroundColor: colorScheme.onSurface,
       elevation: 0,
       scrolledUnderElevation: 2,
@@ -62,30 +64,26 @@ ThemeData buildAppTheme() {
       ),
     ),
 
-    // Card — subtle rounded surface
     cardTheme: CardThemeData(
       elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: colorScheme.surfaceContainerLow,
+      color: kDeepNavy,
       margin: EdgeInsets.zero,
     ),
 
-    // Dialog
     dialogTheme: DialogThemeData(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      backgroundColor: colorScheme.surface,
+      backgroundColor: kDarkNavy,
       elevation: 6,
     ),
 
-    // Tab bar
     tabBarTheme: TabBarThemeData(
-      labelColor: colorScheme.primary,
+      labelColor: kGoldAccent,
       unselectedLabelColor: colorScheme.onSurfaceVariant,
-      indicatorColor: colorScheme.primary,
+      indicatorColor: kGoldAccent,
       dividerColor: colorScheme.outlineVariant,
     ),
 
-    // Input decoration — outlined style
     inputDecorationTheme: InputDecorationThemeData(
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -97,7 +95,7 @@ ThemeData buildAppTheme() {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: colorScheme.primary, width: 2),
+        borderSide: BorderSide(color: kGoldAccent, width: 2),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -108,61 +106,51 @@ ThemeData buildAppTheme() {
         borderSide: BorderSide(color: colorScheme.error, width: 2),
       ),
       filled: true,
-      fillColor: colorScheme.surfaceContainerLowest,
+      fillColor: kDeepNavy,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     ),
 
-    // Navigation Rail (main window side nav)
-    navigationRailTheme: NavigationRailThemeData(
-      backgroundColor: colorScheme.surfaceContainerLow,
-      selectedIconTheme: IconThemeData(color: colorScheme.primary),
-      unselectedIconTheme: IconThemeData(color: colorScheme.onSurfaceVariant),
-      selectedLabelTextStyle: GoogleFonts.inter(
-        color: colorScheme.primary,
-        fontWeight: FontWeight.w600,
-        fontSize: 12,
-      ),
-      unselectedLabelTextStyle: GoogleFonts.inter(
-        color: colorScheme.onSurfaceVariant,
-        fontSize: 12,
-      ),
-      indicatorColor: colorScheme.primaryContainer,
-      elevation: 0,
-    ),
-
-    // Scrollbar — always visible on desktop
     scrollbarTheme: ScrollbarThemeData(
       thumbVisibility: WidgetStateProperty.all(true),
       radius: const Radius.circular(8),
       thickness: WidgetStateProperty.all(6),
     ),
 
-    // Chip
     chipTheme: ChipThemeData(
-      backgroundColor: colorScheme.surfaceContainerLow,
+      backgroundColor: kDeepNavy,
       selectedColor: colorScheme.primaryContainer,
       labelStyle: GoogleFonts.inter(fontSize: 13),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     ),
 
-    // Divider
     dividerTheme: DividerThemeData(
       color: colorScheme.outlineVariant,
       thickness: 1,
       space: 1,
     ),
 
-    // Floating action button
     floatingActionButtonTheme: FloatingActionButtonThemeData(
-      backgroundColor: colorScheme.primary,
-      foregroundColor: colorScheme.onPrimary,
+      backgroundColor: kGoldAccent,
+      foregroundColor: kDeepNavy,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     ),
 
-    // List tile
     listTileTheme: ListTileThemeData(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    ),
+
+    segmentedButtonTheme: SegmentedButtonThemeData(
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return kGoldAccent;
+          return kDeepNavy;
+        }),
+        foregroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return kDeepNavy;
+          return colorScheme.onSurface;
+        }),
+      ),
     ),
   );
 }
