@@ -7,13 +7,42 @@ import 'package:dhikratwork/repositories/dhikr_repository.dart';
 ///
 /// Simulates autoincrement by tracking [_nextId]. All mutations operate on
 /// [_dhikrs] directly. No DatabaseService required.
+///
+/// Pre-seeded with 2 dhikrs so ViewModel tests that call [getAll()] get a
+/// realistic non-empty list without extra setup.
 class FakeDhikrRepository implements DhikrRepository {
-  final List<Dhikr> _dhikrs = [];
-  int _nextId = 1;
+  final List<Dhikr> _dhikrs = [
+    const Dhikr(
+      id: 1,
+      name: 'SubhanAllah',
+      arabicText: 'سُبْحَانَ اللَّهِ',
+      transliteration: 'Subhanallah',
+      translation: 'Glory be to Allah',
+      category: 'general_tasbih',
+      isPreloaded: true,
+      isHidden: false,
+      sortOrder: 1,
+      createdAt: '2026-01-01T00:00:00',
+    ),
+    const Dhikr(
+      id: 2,
+      name: 'Alhamdulillah',
+      arabicText: 'اَلْحَمْدُ لِلَّهِ',
+      transliteration: 'Alhamdulillah',
+      translation: 'Praise be to Allah',
+      category: 'general_tasbih',
+      isPreloaded: true,
+      isHidden: false,
+      sortOrder: 2,
+      createdAt: '2026-01-01T00:00:00',
+    ),
+  ];
+  int _nextId = 3;
 
-  // Allow tests to pre-seed the repository
+  // Allow tests to pre-seed the repository (replaces default data)
   void seed(List<Dhikr> dhikrs) {
     _dhikrs.clear();
+    _nextId = 1;
     for (final d in dhikrs) {
       _dhikrs.add(d.id != null ? d : d.copyWith(id: _nextId++));
     }

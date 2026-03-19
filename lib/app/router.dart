@@ -1,4 +1,5 @@
 // lib/app/router.dart
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -26,8 +27,6 @@ abstract final class AppRoutes {
 /// Global [GoRouter] instance for the main window.
 ///
 /// The floating widget has its own separate window and does NOT use this router.
-/// Routing strategy: top-level [GoRoute] entries — no nested shells yet
-/// (shell routes with persistent NavigationRail added in Phase 2 UI work).
 final GoRouter appRouter = GoRouter(
   initialLocation: AppRoutes.home,
   debugLogDiagnostics: false,
@@ -57,7 +56,8 @@ final GoRouter appRouter = GoRouter(
           path: ':id',
           name: 'library-detail',
           builder: (BuildContext context, GoRouterState state) {
-            final String dhikrId = state.pathParameters['id']!;
+            final int dhikrId =
+                int.parse(state.pathParameters['id']!);
             return DhikrDetailScreen(dhikrId: dhikrId);
           },
         ),
