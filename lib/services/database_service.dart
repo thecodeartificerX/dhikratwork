@@ -30,6 +30,13 @@ class DatabaseService {
     return DatabaseService._(dbPath: dbPath);
   }
 
+  /// Explicitly opens the database. Idempotent — safe to call multiple times.
+  /// Tests should call this in setUp; production code can use [database] getter.
+  Future<void> open() async {
+    if (_database != null && _database!.isOpen) return;
+    _database = await _open();
+  }
+
   /// Returns the open database, opening it lazily on first access.
   Future<Database> get database async {
     if (_database != null) return _database!;
