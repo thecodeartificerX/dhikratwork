@@ -90,6 +90,21 @@ class FakeStatsRepository implements StatsRepository {
     return List.unmodifiable(result);
   }
 
+  @override
+  Future<void> resetDailySummary(int dhikrId, String date) async {
+    final key = _key(dhikrId, date);
+    final existing = _store[key];
+    if (existing != null) {
+      _store[key] = DailySummary(
+        id: existing.id,
+        dhikrId: existing.dhikrId,
+        date: existing.date,
+        totalCount: 0,
+        sessionCount: existing.sessionCount,
+      );
+    }
+  }
+
   /// Test helper — seed a pre-built summary directly.
   void seed(DailySummary summary) {
     _store[_key(summary.dhikrId, summary.date)] = summary;

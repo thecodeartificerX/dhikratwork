@@ -105,6 +105,20 @@ class StatsRepository {
   }
 
   // -------------------------------------------------------------------------
+  // resetDailySummary
+  // -------------------------------------------------------------------------
+
+  /// Resets [total_count] to 0 for the row matching ([dhikrId], [date]).
+  /// No-op if no matching row exists.
+  Future<void> resetDailySummary(int dhikrId, String date) async {
+    await _db.execute(
+      'UPDATE $tDailySummary SET $cSummaryTotalCount = 0 '
+      'WHERE $cSummaryDhikrId = ? AND $cSummaryDate = ?',
+      [dhikrId, date],
+    );
+  }
+
+  // -------------------------------------------------------------------------
   // getCountsByDhikrForPeriod
   // -------------------------------------------------------------------------
 

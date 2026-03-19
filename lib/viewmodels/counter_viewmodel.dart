@@ -1,10 +1,10 @@
 // lib/viewmodels/counter_viewmodel.dart
 
 import 'package:flutter/foundation.dart';
-import 'package:dhikratwork/app/app_locator.dart';
 import 'package:dhikratwork/models/dhikr.dart';
 import 'package:dhikratwork/models/dhikr_session.dart';
 import 'package:dhikratwork/repositories/dhikr_repository.dart';
+import 'package:dhikratwork/utils/constants.dart';
 import 'package:dhikratwork/repositories/session_repository.dart';
 import 'package:dhikratwork/repositories/stats_repository.dart';
 import 'package:dhikratwork/repositories/streak_repository.dart';
@@ -49,6 +49,9 @@ class CounterViewModel extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  int _sessionCount = 0;
+  int get sessionCount => _sessionCount;
+
   // ---------------------------------------------------------------------------
   // Commands
   // ---------------------------------------------------------------------------
@@ -83,6 +86,7 @@ class CounterViewModel extends ChangeNotifier {
   /// Start a new session for [dhikrId]. Call before the user begins counting
   /// via the widget toolbar or main window.
   Future<void> startSession(int dhikrId) async {
+    _sessionCount = 0;
     await _sessionRepository.createSession(dhikrId, 'main_app');
     // Re-fetch so we have the full object including assigned id.
     _activeSession = await _sessionRepository.getActiveSession(dhikrId);
@@ -149,6 +153,7 @@ class CounterViewModel extends ChangeNotifier {
 
     // Update in-memory count.
     _todayCount++;
+    _sessionCount++;
     notifyListeners();
 
     // Update streak (non-blocking).
@@ -156,22 +161,58 @@ class CounterViewModel extends ChangeNotifier {
 
     // Check achievements (non-blocking).
     _checkAchievements(activeDhikrId);
+  }
 
-    // Refresh WidgetToolbarViewModel counts so the floating toolbar updates.
-    // Both share the same main-window isolate, so direct call works.
-    // AppLocator may not be initialized if called from tests — guard with try.
-    try {
-      final widgetVm = AppLocator.instance.widgetToolbarViewModel;
-      final ids = widgetVm.toolbarDhikrs
-          .where((d) => d.id != null)
-          .map((d) => d.id!)
-          .toList();
-      if (ids.contains(activeDhikrId)) {
-        await widgetVm.incrementDhikr(activeDhikrId);
-      }
-    } catch (_) {
-      // AppLocator not initialized (e.g. test environment). Ignore.
+  /// Restores active dhikr and session state from DB on app startup.
+  /// If an open session exists, resumes it with the persisted count.
+  /// If no open session but an active dhikr is set, starts a fresh session.
+  Future<void> loadActiveSession() async {
+    final settings = await _settingsRepository.getSettings();
+    final activeDhikrId = settings.activeDhikrId;
+    if (activeDhikrId == null) return;
+
+    _activeDhikr = await _dhikrRepository.getById(activeDhikrId);
+    if (_activeDhikr == null) return;
+
+    final openSession = await _sessionRepository.getActiveSession(activeDhikrId);
+    if (openSession != null) {
+      _activeSession = openSession;
+      _sessionCount = openSession.count;
+    } else {
+      _sessionCount = 0;
+      await _sessionRepository.createSession(activeDhikrId, kSourceMainApp);
+      _activeSession = await _sessionRepository.getActiveSession(activeDhikrId);
     }
+
+    final today = _todayDateString();
+    _todayCount = await _statsRepository.getTotalCountForDate(today);
+    notifyListeners();
+  }
+
+  /// Ends the current session and starts a fresh one for the same dhikr.
+  Future<void> resetSessionCount() async {
+    if (_activeDhikr?.id == null) return;
+    final dhikrId = _activeDhikr!.id!;
+
+    if (_activeSession?.id != null) {
+      await _sessionRepository.endSession(_activeSession!.id!);
+    }
+
+    _sessionCount = 0;
+    await _sessionRepository.createSession(dhikrId, kSourceMainApp);
+    _activeSession = await _sessionRepository.getActiveSession(dhikrId);
+    notifyListeners();
+  }
+
+  /// Resets the daily_summary total for the active dhikr to 0 for today.
+  Future<void> resetTodayCount() async {
+    if (_activeDhikr?.id == null) return;
+    final dhikrId = _activeDhikr!.id!;
+    final today = _todayDateString();
+
+    await _statsRepository.resetDailySummary(dhikrId, today);
+    _todayCount = 0;
+    notifyListeners();
   }
 
   // ---------------------------------------------------------------------------
