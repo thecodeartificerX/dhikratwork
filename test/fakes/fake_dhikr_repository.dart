@@ -1,0 +1,79 @@
+// test/fakes/fake_dhikr_repository.dart
+
+import 'package:dhikratwork/models/dhikr.dart';
+import 'package:dhikratwork/repositories/dhikr_repository.dart';
+
+/// In-memory fake of [DhikrRepository] for use in ViewModel unit tests.
+///
+/// Simulates autoincrement by tracking [_nextId]. All mutations operate on
+/// [_dhikrs] directly. No DatabaseService required.
+class FakeDhikrRepository implements DhikrRepository {
+  final List<Dhikr> _dhikrs = [];
+  int _nextId = 1;
+
+  // Allow tests to pre-seed the repository
+  void seed(List<Dhikr> dhikrs) {
+    _dhikrs.clear();
+    for (final d in dhikrs) {
+      _dhikrs.add(d.id != null ? d : d.copyWith(id: _nextId++));
+    }
+  }
+
+  @override
+  Future<Dhikr> add(Dhikr dhikr) async {
+    final withId = dhikr.copyWith(id: _nextId++);
+    _dhikrs.add(withId);
+    return withId;
+  }
+
+  @override
+  Future<void> delete(int id) async {
+    _dhikrs.removeWhere((d) => d.id == id);
+  }
+
+  @override
+  Future<List<Dhikr>> getAll() async {
+    return List.unmodifiable(List<Dhikr>.from(_dhikrs));
+  }
+
+  @override
+  Future<List<Dhikr>> getByCategory(String category) async {
+    return List.unmodifiable(
+      _dhikrs.where((d) => d.category == category).toList(),
+    );
+  }
+
+  @override
+  Future<Dhikr?> getById(int id) async {
+    try {
+      return _dhikrs.firstWhere((d) => d.id == id);
+    } on StateError {
+      return null;
+    }
+  }
+
+  @override
+  Future<List<Dhikr>> getVisible() async {
+    return List.unmodifiable(
+      _dhikrs.where((d) => !d.isHidden).toList(),
+    );
+  }
+
+  @override
+  Future<void> hide(int id) async {
+    final idx = _dhikrs.indexWhere((d) => d.id == id);
+    if (idx != -1) _dhikrs[idx] = _dhikrs[idx].copyWith(isHidden: true);
+  }
+
+  @override
+  Future<void> unhide(int id) async {
+    final idx = _dhikrs.indexWhere((d) => d.id == id);
+    if (idx != -1) _dhikrs[idx] = _dhikrs[idx].copyWith(isHidden: false);
+  }
+
+  @override
+  Future<void> update(Dhikr dhikr) async {
+    final idx = _dhikrs.indexWhere((d) => d.id == dhikr.id);
+    if (idx != -1) _dhikrs[idx] = dhikr;
+  }
+}
