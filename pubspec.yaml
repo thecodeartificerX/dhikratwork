@@ -27,9 +27,13 @@ dependencies:
   fl_chart: ^0.69.0
 
   # Platform integration
+  window_manager: ^0.4.3
+  desktop_multi_window: ^0.3.0
   hotkey_manager: ^0.2.3
   tray_manager: ^0.2.3
-  window_manager: ^0.4.3
+
+  # File system access (data export)
+  path_provider: ^2.1.2
 
   # Payments / subscription
   url_launcher: ^6.3.1
@@ -49,3 +53,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/tray/tray_icon.png

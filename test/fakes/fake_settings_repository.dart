@@ -26,6 +26,9 @@ class FakeSettingsRepository implements SettingsRepository {
   /// Override the initial settings for tests that need specific defaults.
   void seed(UserSettings settings) => _settings = settings;
 
+  /// Alias for [seed] — used in Phase 6 widget tests.
+  void overrideSettings(UserSettings s) => _settings = s;
+
   @override
   Future<UserSettings> getSettings() async => _settings;
 
