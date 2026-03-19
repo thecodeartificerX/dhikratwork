@@ -1,6 +1,7 @@
 // lib/viewmodels/counter_viewmodel.dart
 
 import 'package:flutter/foundation.dart';
+import 'package:dhikratwork/app/app_locator.dart';
 import 'package:dhikratwork/models/dhikr.dart';
 import 'package:dhikratwork/models/dhikr_session.dart';
 import 'package:dhikratwork/repositories/dhikr_repository.dart';
@@ -121,6 +122,56 @@ class CounterViewModel extends ChangeNotifier {
 
     // 5. Check achievements (non-blocking).
     _checkAchievements(dhikrId);
+  }
+
+  /// Increments the active dhikr. Called by:
+  /// - HotkeyService (source: 'hotkey')
+  /// - FloatingToolbar tap (source: 'widget')
+  /// - Dashboard tap (source: 'main_app')
+  ///
+  /// Uses Phase 2A SessionRepository API: getActiveSession + createSession +
+  /// incrementCount(sessionId). incrementCount takes a session id, not a dhikr id.
+  Future<void> incrementActiveDhikr({required String source}) async {
+    final settings = await _settingsRepository.getSettings();
+    final activeDhikrId = settings.activeDhikrId;
+
+    if (activeDhikrId == null) return; // No active dhikr set yet.
+
+    // Get or create the active session for this dhikr, then increment.
+    var session = await _sessionRepository.getActiveSession(activeDhikrId);
+    session ??=
+        await _sessionRepository.createSession(activeDhikrId, source);
+    await _sessionRepository.incrementCount(session.id!);
+
+    // Persist to daily_summary for stats.
+    final today = _todayDateString();
+    await _statsRepository.upsertDailySummary(activeDhikrId, today, 1);
+
+    // Update in-memory count.
+    _todayCount++;
+    notifyListeners();
+
+    // Update streak (non-blocking).
+    _updateStreak(today);
+
+    // Check achievements (non-blocking).
+    _checkAchievements(activeDhikrId);
+
+    // Refresh WidgetToolbarViewModel counts so the floating toolbar updates.
+    // Both share the same main-window isolate, so direct call works.
+    // AppLocator may not be initialized if called from tests — guard with try.
+    try {
+      final widgetVm = AppLocator.instance.widgetToolbarViewModel;
+      final ids = widgetVm.toolbarDhikrs
+          .where((d) => d.id != null)
+          .map((d) => d.id!)
+          .toList();
+      if (ids.contains(activeDhikrId)) {
+        await widgetVm.incrementDhikr(activeDhikrId);
+      }
+    } catch (_) {
+      // AppLocator not initialized (e.g. test environment). Ignore.
+    }
   }
 
   // ---------------------------------------------------------------------------
