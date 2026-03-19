@@ -3,10 +3,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:tray_manager/tray_manager.dart';
 
-import 'package:dhikratwork/viewmodels/widget_toolbar_viewmodel.dart';
-import 'package:dhikratwork/services/floating_window_manager.dart';
-
-/// Manages the system tray icon and context menu.
+/// Manages the system tray icon and a minimal context menu.
 ///
 /// NOTE: The tray icon asset must be registered in pubspec.yaml:
 ///   flutter:
@@ -20,79 +17,18 @@ class TrayService with TrayListener {
 
   static final TrayService instance = TrayService._();
 
-  VoidCallback? _onShowMainWindow;
-  VoidCallback? _onHideMainWindow;
   VoidCallback? _onQuit;
-  WidgetToolbarViewModel? _widgetToolbarViewModel;
 
-  // Track whether the main window is currently visible.
-  bool _mainWindowVisible = true;
-
-  /// Must be called once after the tray icon asset is set in main.dart.
-  Future<void> setup({
-    required VoidCallback onShowMainWindow,
-    required VoidCallback onHideMainWindow,
-    required VoidCallback onQuit,
-    required WidgetToolbarViewModel widgetToolbarViewModel,
-  }) async {
-    _onShowMainWindow = onShowMainWindow;
-    _onHideMainWindow = onHideMainWindow;
+  /// Must be called once after the tray icon asset is set via trayManager.setIcon().
+  Future<void> setup({required VoidCallback onQuit}) async {
     _onQuit = onQuit;
-    _widgetToolbarViewModel = widgetToolbarViewModel;
 
     trayManager.addListener(this);
 
-    // Set tooltip on the tray icon.
     await trayManager.setToolTip('DhikrAtWork');
-
-    // Build the initial context menu.
-    await _rebuildContextMenu();
-
-    // Listen for ViewModel changes to rebuild the menu when counts update.
-    widgetToolbarViewModel.addListener(_onViewModelChanged);
-  }
-
-  Future<void> _onViewModelChanged() async {
-    await _rebuildContextMenu();
-  }
-
-  Future<void> _rebuildContextMenu() async {
-    final vm = _widgetToolbarViewModel;
-
-    String activeDhikrName = 'None';
-    int activeDhikrCount = 0;
-
-    if (vm != null) {
-      if (vm.activeDhikrId != null) {
-        final activeDhikr = vm.toolbarDhikrs
-            .where((d) => d.id == vm.activeDhikrId)
-            .firstOrNull;
-        if (activeDhikr != null) {
-          activeDhikrName = activeDhikr.name;
-          activeDhikrCount = vm.todayCounts[vm.activeDhikrId!] ?? 0;
-        }
-      }
-    }
 
     final menu = Menu(
       items: [
-        MenuItem(
-          key: 'toggle_main_window',
-          label: _mainWindowVisible ? 'Hide Main Window' : 'Show Main Window',
-        ),
-        MenuItem(
-          key: 'toggle_floating_widget',
-          label: FloatingWindowManager.instance.isVisible
-              ? 'Hide Floating Widget'
-              : 'Show Floating Widget',
-        ),
-        MenuItem.separator(),
-        MenuItem(
-          key: 'active_dhikr_info',
-          label: 'Active: $activeDhikrName — $activeDhikrCount today',
-          disabled: true, // Display only, not clickable
-        ),
-        MenuItem.separator(),
         MenuItem(
           key: 'quit',
           label: 'Quit DhikrAtWork',
@@ -103,21 +39,13 @@ class TrayService with TrayListener {
     await trayManager.setContextMenu(menu);
   }
 
-  // Called when user left-clicks the tray icon.
+  /// Left-click on the tray icon — no action in single-window mode.
   @override
   void onTrayIconMouseDown() {
-    if (_mainWindowVisible) {
-      _mainWindowVisible = false;
-      _onHideMainWindow?.call();
-    } else {
-      _mainWindowVisible = true;
-      _onShowMainWindow?.call();
-    }
-    _rebuildContextMenu();
+    // No-op: the app is always visible as a compact bar or expanded window.
   }
 
-  // Called when user right-clicks (shows context menu automatically on Windows;
-  // on macOS this must be triggered manually).
+  /// Right-click on the tray icon — pop up the context menu.
   @override
   void onTrayIconRightMouseDown() {
     trayManager.popUpContextMenu();
@@ -125,32 +53,12 @@ class TrayService with TrayListener {
 
   @override
   void onTrayMenuItemClick(MenuItem menuItem) {
-    switch (menuItem.key) {
-      case 'toggle_main_window':
-        if (_mainWindowVisible) {
-          _mainWindowVisible = false;
-          _onHideMainWindow?.call();
-        } else {
-          _mainWindowVisible = true;
-          _onShowMainWindow?.call();
-        }
-        _rebuildContextMenu();
-
-      case 'toggle_floating_widget':
-        if (FloatingWindowManager.instance.isVisible) {
-          FloatingWindowManager.instance.hideFloatingWidget();
-        } else {
-          FloatingWindowManager.instance.showFloatingWidget();
-        }
-        _rebuildContextMenu();
-
-      case 'quit':
-        _onQuit?.call();
+    if (menuItem.key == 'quit') {
+      _onQuit?.call();
     }
   }
 
   void dispose() {
     trayManager.removeListener(this);
-    _widgetToolbarViewModel?.removeListener(_onViewModelChanged);
   }
 }
