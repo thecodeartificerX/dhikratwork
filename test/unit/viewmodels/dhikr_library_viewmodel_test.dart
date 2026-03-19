@@ -14,44 +14,19 @@ void main() {
     vm = DhikrLibraryViewModel(dhikrRepository: dhikrRepo);
   });
 
-  test('initial state: empty lists, not loading', () {
+  test('initial state: empty list, not loading', () {
     expect(vm.dhikrList, isEmpty);
-    expect(vm.filteredList, isEmpty);
     expect(vm.isLoading, isFalse);
-    expect(vm.selectedCategory, isNull);
   });
 
-  test('loadAll populates dhikrList and filteredList', () async {
+  test('loadAll populates dhikrList', () async {
     int notifyCount = 0;
     vm.addListener(() => notifyCount++);
 
     await vm.loadAll();
 
     expect(vm.dhikrList, hasLength(2));
-    expect(vm.filteredList, hasLength(2));
     expect(notifyCount, greaterThan(0));
-  });
-
-  test('filterByCategory filters filteredList, not dhikrList', () async {
-    await vm.loadAll();
-
-    vm.filterByCategory('general_tasbih');
-
-    expect(vm.selectedCategory, equals('general_tasbih'));
-    expect(vm.filteredList, hasLength(2));
-    expect(vm.dhikrList, hasLength(2)); // master list unchanged
-
-    vm.filterByCategory('post_salah');
-    expect(vm.filteredList, isEmpty);
-  });
-
-  test('filterByCategory(null) resets filter', () async {
-    await vm.loadAll();
-    vm.filterByCategory('post_salah');
-    vm.filterByCategory(null);
-
-    expect(vm.selectedCategory, isNull);
-    expect(vm.filteredList, hasLength(2));
   });
 
   test('addDhikr inserts and refreshes list', () async {
@@ -82,9 +57,8 @@ void main() {
   test('hideDhikr sets isHidden=true and reloads', () async {
     await vm.loadAll();
     await vm.hideDhikr(1);
-    // After reload, the hidden dhikr should not appear in filteredList
-    // (filtered list hides hidden items)
-    expect(vm.filteredList.any((d) => d.id == 1 && !d.isHidden), isFalse);
+    // After reload, the hidden dhikr should not appear in dhikrList
+    expect(vm.dhikrList.any((d) => d.id == 1 && !d.isHidden), isFalse);
   });
 
   test('dhikrList is unmodifiable', () async {

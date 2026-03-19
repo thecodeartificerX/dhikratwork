@@ -19,14 +19,6 @@ class DhikrLibraryViewModel extends ChangeNotifier {
   /// Full master list, unmodifiable. Excludes hidden items.
   List<Dhikr> get dhikrList => _dhikrList;
 
-  List<Dhikr> _filteredList = const [];
-
-  /// Category-filtered view of [dhikrList].
-  List<Dhikr> get filteredList => _filteredList;
-
-  String? _selectedCategory;
-  String? get selectedCategory => _selectedCategory;
-
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
@@ -42,18 +34,10 @@ class DhikrLibraryViewModel extends ChangeNotifier {
     try {
       final all = await _dhikrRepository.getAll();
       _dhikrList = List.unmodifiable(all.where((d) => !d.isHidden).toList());
-      _applyFilter();
     } finally {
       _isLoading = false;
       notifyListeners();
     }
-  }
-
-  /// Set [category] as active filter. Pass null to clear.
-  void filterByCategory(String? category) {
-    _selectedCategory = category;
-    _applyFilter();
-    notifyListeners();
   }
 
   /// Insert a new dhikr and refresh.
@@ -78,19 +62,5 @@ class DhikrLibraryViewModel extends ChangeNotifier {
   Future<void> hideDhikr(int id) async {
     await _dhikrRepository.hide(id);
     await loadAll();
-  }
-
-  // ---------------------------------------------------------------------------
-  // Helpers
-  // ---------------------------------------------------------------------------
-
-  void _applyFilter() {
-    if (_selectedCategory == null) {
-      _filteredList = List.unmodifiable(_dhikrList);
-    } else {
-      _filteredList = List.unmodifiable(
-        _dhikrList.where((d) => d.category == _selectedCategory).toList(),
-      );
-    }
   }
 }
