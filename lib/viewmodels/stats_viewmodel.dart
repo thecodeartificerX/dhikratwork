@@ -1,18 +1,36 @@
 // lib/viewmodels/stats_viewmodel.dart
 import 'package:flutter/foundation.dart';
-import '../repositories/stats_repository.dart';
+import 'package:dhikratwork/repositories/stats_repository.dart';
+import 'package:dhikratwork/repositories/streak_repository.dart';
+import 'package:dhikratwork/repositories/dhikr_repository.dart';
 
 class StatsViewModel extends ChangeNotifier {
   final StatsRepository _statsRepository;
+  final StreakRepository _streakRepository;
+  final DhikrRepository _dhikrRepository;
 
-  StatsViewModel({required StatsRepository statsRepository})
-      : _statsRepository = statsRepository;
+  StatsViewModel({
+    required StatsRepository statsRepository,
+    required StreakRepository streakRepository,
+    required DhikrRepository dhikrRepository,
+  })  : _statsRepository = statsRepository,
+        _streakRepository = streakRepository,
+        _dhikrRepository = dhikrRepository;
 
   String selectedPeriod = 'day'; // 'day' | 'week' | 'month'
   Map<String, int> barChartData = {};
   List<MapEntry<String, int>> lineChartData = [];
   bool isLoading = false;
   String? errorMessage;
+
+  int _currentStreak = 0;
+  int get currentStreak => _currentStreak;
+
+  int _totalCountForPeriod = 0;
+  int get totalCountForPeriod => _totalCountForPeriod;
+
+  /// ID → name lookup map, populated during [loadStats].
+  Map<int, String> _dhikrNames = {};
 
   Future<void> loadStats() async {
     isLoading = true;
@@ -28,28 +46,47 @@ class StatsViewModel extends ChangeNotifier {
           '${end.month.toString().padLeft(2, '0')}-'
           '${end.day.toString().padLeft(2, '0')}';
 
-      final summaries = await _statsRepository.getDailySummariesForPeriod(
-        startDate,
-        endDate,
-      );
+      // Load summaries, streak, and dhikr list in parallel.
+      final results = await Future.wait([
+        _statsRepository.getDailySummariesForPeriod(startDate, endDate),
+        _streakRepository.getStreak(),
+        _dhikrRepository.getAll(),
+      ]);
 
-      // Build barChartData: dhikrId (as string key) -> total count for period
+      final summaries = results[0] as List;
+      final streak = results[1];
+      final dhikrs = results[2] as List;
+
+      // Populate dhikr name lookup map.
+      _dhikrNames = {
+        for (final d in dhikrs)
+          if (d.id != null) d.id as int: d.name as String,
+      };
+
+      // Extract currentStreak from the loaded Streak model.
+      _currentStreak = (streak as dynamic).currentStreak as int;
+
+      // Build barChartData: dhikrId (as string key) -> total count for period.
       final barMap = <String, int>{};
       for (final s in summaries) {
-        final key = s.dhikrId.toString();
-        barMap[key] = (barMap[key] ?? 0) + s.totalCount;
+        final key = (s.dhikrId as int).toString();
+        barMap[key] = (barMap[key] ?? 0) + (s.totalCount as int);
       }
       barChartData = Map.unmodifiable(barMap);
 
-      // Build lineChartData: date -> daily total across all dhikrs
+      // Build lineChartData: date -> daily total across all dhikrs.
       final lineMap = <String, int>{};
       for (final s in summaries) {
-        lineMap[s.date] = (lineMap[s.date] ?? 0) + s.totalCount;
+        final date = s.date as String;
+        lineMap[date] = (lineMap[date] ?? 0) + (s.totalCount as int);
       }
       final sortedDates = lineMap.keys.toList()..sort();
       lineChartData = List.unmodifiable(
         sortedDates.map((d) => MapEntry(d, lineMap[d]!)).toList(),
       );
+
+      // Compute totalCountForPeriod as sum of all bar chart values.
+      _totalCountForPeriod = barMap.values.fold(0, (sum, v) => sum + v);
     } catch (e) {
       errorMessage = 'Failed to load stats: $e';
     } finally {
@@ -67,6 +104,9 @@ class StatsViewModel extends ChangeNotifier {
     notifyListeners();
     await loadStats();
   }
+
+  /// Returns the dhikr name for [id], or 'Unknown' if not found.
+  String dhikrNameForId(int id) => _dhikrNames[id] ?? 'Unknown';
 
   /// Returns (startDate, endDate) inclusive based on [selectedPeriod].
   (DateTime, DateTime) getDateRange() {
