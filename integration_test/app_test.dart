@@ -239,24 +239,8 @@ void main() {
       },
     );
 
-    test(
-      'category filter narrows the displayed dhikr list',
-      () async {
-        final libraryVm = DhikrLibraryViewModel(dhikrRepository: dhikrRepo);
-        await libraryVm.loadAll();
-
-        libraryVm.filterByCategory(kCategoryPostSalah);
-
-        // filteredList should only contain post_salah dhikr.
-        for (final dhikr in libraryVm.filteredList) {
-          expect(dhikr.category, equals(kCategoryPostSalah));
-        }
-
-        // Clearing the filter restores the full list.
-        libraryVm.filterByCategory(null);
-        expect(libraryVm.filteredList.length, equals(libraryVm.dhikrList.length));
-      },
-    );
+    // category filter test removed: filterByCategory/filteredList were removed
+    // from DhikrLibraryViewModel in Phase 1.
   });
 
   // ---------------------------------------------------------------------------

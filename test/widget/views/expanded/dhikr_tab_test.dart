@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
-import 'package:dhikratwork/models/dhikr.dart';
 import 'package:dhikratwork/viewmodels/dhikr_library_viewmodel.dart';
 import 'package:dhikratwork/viewmodels/counter_viewmodel.dart';
 import 'package:dhikratwork/viewmodels/settings_viewmodel.dart';
@@ -19,7 +18,6 @@ import '../../../fakes/fake_subscription_service.dart';
 Widget _buildTestApp({
   FakeDhikrRepository? dhikrRepo,
   FakeSettingsRepository? settingsRepo,
-  Dhikr? activeDhikr,
   VoidCallback? onSwitchToSettings,
 }) {
   dhikrRepo ??= FakeDhikrRepository();

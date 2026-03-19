@@ -63,9 +63,6 @@ class _ExpandedShellState extends State<ExpandedShell>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return Scaffold(
       backgroundColor: kDarkNavy,
       body: Column(
