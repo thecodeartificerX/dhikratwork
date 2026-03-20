@@ -26,7 +26,7 @@ void main() {
       expect(hotKey, isNotNull);
       expect(hotKey!.key, equals(LogicalKeyboardKey.f9));
       expect(hotKey.modifiers, anyOf(isNull, isEmpty));
-      expect(hotKey.scope, equals(HotKeyScope.inapp));
+      expect(hotKey.scope, equals(HotKeyScope.system));
     });
 
     // -----------------------------------------------------------------------
@@ -128,22 +128,22 @@ void main() {
       expect(hotKey.scope, equals(HotKeyScope.system));
     });
 
-    test('0 (bare digit) returns digit0 with inapp scope', () {
+    test('0 (bare digit) returns digit0 with system scope', () {
       final hotKey = parseHotKey('0');
       expect(hotKey, isNotNull);
       expect(hotKey!.key, equals(LogicalKeyboardKey.digit0));
-      expect(hotKey.scope, equals(HotKeyScope.inapp));
+      expect(hotKey.scope, equals(HotKeyScope.system));
     });
 
     // -----------------------------------------------------------------
     // Punctuation keys
     // -----------------------------------------------------------------
 
-    test('. (bare period) returns period with inapp scope', () {
+    test('. (bare period) returns period with system scope', () {
       final hotKey = parseHotKey('.');
       expect(hotKey, isNotNull);
       expect(hotKey!.key, equals(LogicalKeyboardKey.period));
-      expect(hotKey.scope, equals(HotKeyScope.inapp));
+      expect(hotKey.scope, equals(HotKeyScope.system));
     });
 
     test('ctrl+. returns period with system scope', () {
@@ -160,11 +160,11 @@ void main() {
       expect(hotKey.scope, equals(HotKeyScope.system));
     });
 
-    test('/ (bare slash) returns slash with inapp scope', () {
+    test('/ (bare slash) returns slash with system scope', () {
       final hotKey = parseHotKey('/');
       expect(hotKey, isNotNull);
       expect(hotKey!.key, equals(LogicalKeyboardKey.slash));
-      expect(hotKey.scope, equals(HotKeyScope.inapp));
+      expect(hotKey.scope, equals(HotKeyScope.system));
     });
 
     test('ctrl+- returns minus with system scope', () {
@@ -192,11 +192,11 @@ void main() {
       expect(hotKey.scope, equals(HotKeyScope.system));
     });
 
-    test('enter (bare) returns enter with inapp scope', () {
+    test('enter (bare) returns enter with system scope', () {
       final hotKey = parseHotKey('enter');
       expect(hotKey, isNotNull);
       expect(hotKey!.key, equals(LogicalKeyboardKey.enter));
-      expect(hotKey.scope, equals(HotKeyScope.inapp));
+      expect(hotKey.scope, equals(HotKeyScope.system));
     });
 
     test('ctrl+backspace returns backspace with system scope', () {
@@ -210,11 +210,11 @@ void main() {
     // Space (special trim handling)
     // -----------------------------------------------------------------
 
-    test('bare space returns space with inapp scope', () {
+    test('bare space returns space with system scope', () {
       final hotKey = parseHotKey(' ');
       expect(hotKey, isNotNull);
       expect(hotKey!.key, equals(LogicalKeyboardKey.space));
-      expect(hotKey.scope, equals(HotKeyScope.inapp));
+      expect(hotKey.scope, equals(HotKeyScope.system));
     });
 
     test('ctrl+space returns space with system scope', () {
@@ -228,11 +228,11 @@ void main() {
     // Numpad keys
     // -----------------------------------------------------------------
 
-    test('numpad 5 returns numpad5 with inapp scope', () {
+    test('numpad 5 returns numpad5 with system scope', () {
       final hotKey = parseHotKey('numpad 5');
       expect(hotKey, isNotNull);
       expect(hotKey!.key, equals(LogicalKeyboardKey.numpad5));
-      expect(hotKey.scope, equals(HotKeyScope.inapp));
+      expect(hotKey.scope, equals(HotKeyScope.system));
     });
 
     test('ctrl+numpad add returns numpadAdd with system scope', () {

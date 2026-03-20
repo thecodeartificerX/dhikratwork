@@ -6,9 +6,9 @@ import 'package:hotkey_manager/hotkey_manager.dart';
 /// Parses a hotkey string like 'ctrl+shift+d' into a [HotKey].
 /// Returns null if the string is malformed or the key is unrecognised.
 ///
-/// Scope is determined automatically:
-/// - Has modifiers → [HotKeyScope.system] (works in background)
-/// - No modifiers → [HotKeyScope.inapp] (works when app has focus)
+/// Always uses [HotKeyScope.system] so the hotkey works in the background.
+/// The [HotkeyService.register] method will fall back to [HotKeyScope.inapp]
+/// if the OS rejects a bare key at system scope.
 HotKey? parseHotKey(String hotkeyString) {
   if (hotkeyString.isEmpty) return null;
 
@@ -50,7 +50,7 @@ HotKey? parseHotKey(String hotkeyString) {
   return HotKey(
     key: logicalKey,
     modifiers: modifiers,
-    scope: modifiers.isEmpty ? HotKeyScope.inapp : HotKeyScope.system,
+    scope: HotKeyScope.system,
   );
 }
 
@@ -174,16 +174,22 @@ class HotkeyService {
 
   HotKey? _currentHotKey;
   bool _isRegistered = false;
+  HotKeyScope? _registeredScope;
 
   bool get isRegistered => _isRegistered;
   HotKey? get currentHotKey => _currentHotKey;
+  HotKeyScope? get registeredScope => _registeredScope;
 
-  /// Registers [hotkeyString] (e.g., 'ctrl+shift+d') as a system-wide hotkey.
+  /// Registers [hotkeyString] as a hotkey.
+  ///
+  /// Always tries [HotKeyScope.system] first (works in background). If the OS
+  /// rejects a bare key (no modifiers), falls back to [HotKeyScope.inapp]
+  /// (works only when app has keyboard focus).
   ///
   /// [onTriggered] is called each time the hotkey fires.
   /// [onRegistrationFailed] is called with a reason string if registration
   /// fails: `'unsupported_key'` if the key cannot be parsed, or
-  /// `'registration_failed'` if the OS rejected the hotkey.
+  /// `'registration_failed'` if both scopes were rejected.
   ///
   /// Returns true if registration succeeded.
   Future<bool> register({
@@ -199,6 +205,7 @@ class HotkeyService {
       return false;
     }
 
+    // Try system scope first (works in background).
     try {
       await hotKeyManager.register(
         hotKey,
@@ -206,13 +213,38 @@ class HotkeyService {
       );
       _currentHotKey = hotKey;
       _isRegistered = true;
+      _registeredScope = HotKeyScope.system;
       return true;
-    } catch (e) {
-      _isRegistered = false;
-      _currentHotKey = null;
-      onRegistrationFailed?.call('registration_failed');
-      return false;
+    } catch (_) {
+      // System registration failed — try inapp fallback for bare keys.
     }
+
+    // Fallback: if no modifiers, try inapp scope (works only when focused).
+    if (hotKey.modifiers == null || hotKey.modifiers!.isEmpty) {
+      try {
+        final inAppHotKey = HotKey(
+          key: hotKey.key,
+          modifiers: hotKey.modifiers,
+          scope: HotKeyScope.inapp,
+        );
+        await hotKeyManager.register(
+          inAppHotKey,
+          keyDownHandler: (_) => onTriggered(),
+        );
+        _currentHotKey = inAppHotKey;
+        _isRegistered = true;
+        _registeredScope = HotKeyScope.inapp;
+        return true;
+      } catch (_) {
+        // Both scopes failed.
+      }
+    }
+
+    _isRegistered = false;
+    _currentHotKey = null;
+    _registeredScope = null;
+    onRegistrationFailed?.call('registration_failed');
+    return false;
   }
 
   /// Unregisters the currently active hotkey.
@@ -226,6 +258,7 @@ class HotkeyService {
     }
     _currentHotKey = null;
     _isRegistered = false;
+    _registeredScope = null;
   }
 
   /// Unregisters all hotkeys registered by this app.
@@ -233,5 +266,6 @@ class HotkeyService {
     await hotKeyManager.unregisterAll();
     _currentHotKey = null;
     _isRegistered = false;
+    _registeredScope = null;
   }
 }

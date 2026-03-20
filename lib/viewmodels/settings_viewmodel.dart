@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:flutter/foundation.dart';
+import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../models/dhikr.dart';
@@ -248,6 +249,10 @@ class SettingsViewModel extends ChangeNotifier {
     );
 
     _hotkeyRegistered = success;
+    if (success && HotkeyService.instance.registeredScope == HotKeyScope.inapp) {
+      _hotkeyError =
+          'This key only works when the app is focused. Add a modifier for background use.';
+    }
     notifyListeners();
   }
 
@@ -261,8 +266,13 @@ class SettingsViewModel extends ChangeNotifier {
 
     if (success) {
       _settings = _settings.copyWith(globalHotkey: newHotkeyString);
-      _hotkeyError = null;
       _hotkeyRegistered = true;
+      if (HotkeyService.instance.registeredScope == HotKeyScope.inapp) {
+        _hotkeyError =
+            'This key only works when the app is focused. Add a modifier for background use.';
+      } else {
+        _hotkeyError = null;
+      }
       await _settingsRepository.updateSettings(_settings);
     } else {
       _hotkeyRegistered = false;
