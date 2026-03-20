@@ -151,4 +151,19 @@ void main() {
       await expectLater(vm.exportData('csv'), completes);
     });
   });
+
+  group('changeHotkey', () {
+    test('unsupported key sets hotkeyError to not-supported message', () async {
+      await vm.loadSettings();
+      await vm.changeHotkey('nonsense');
+      expect(vm.hotkeyRegistered, isFalse);
+      expect(vm.hotkeyError, contains('not supported'));
+    });
+
+    // Note: Testing the success path (valid key → hotkeyError is null,
+    // hotkeyRegistered is true) requires a real OS window for
+    // hotKeyManager.register(). This needs HotkeyService to accept
+    // injection — tracked as future improvement. The unsupported_key
+    // path above is the only one reliably testable in unit tests.
+  });
 }
