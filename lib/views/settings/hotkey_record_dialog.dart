@@ -17,6 +17,7 @@ class HotkeyRecordDialog extends StatefulWidget {
 class _HotkeyRecordDialogState extends State<HotkeyRecordDialog> {
   String _recorded = 'Press a key combination...';
   String? _pendingHotkey;
+  bool _hasModifier = false;
   final FocusNode _focusNode = FocusNode();
 
   @override
@@ -58,9 +59,11 @@ class _HotkeyRecordDialogState extends State<HotkeyRecordDialog> {
       final label = key.keyLabel.toLowerCase();
       parts.add(label);
       final hotkey = parts.join('+');
+      final hasModifier = parts.length >= 2;
       setState(() {
         _recorded = hotkey;
         _pendingHotkey = hotkey;
+        _hasModifier = hasModifier;
       });
     }
   }
@@ -94,6 +97,18 @@ class _HotkeyRecordDialogState extends State<HotkeyRecordDialog> {
                     ),
               ),
             ),
+            if (_pendingHotkey != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  _hasModifier
+                      ? 'System-wide — works in background'
+                      : 'Single key — works when app is focused',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+              ),
           ],
         ),
       ),
