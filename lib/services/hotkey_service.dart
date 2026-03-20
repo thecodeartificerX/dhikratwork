@@ -5,13 +5,39 @@ import 'package:hotkey_manager/hotkey_manager.dart';
 
 /// Parses a hotkey string like 'ctrl+shift+d' into a [HotKey].
 /// Returns null if the string is malformed or the key is unrecognised.
+///
+/// Scope is determined automatically:
+/// - Has modifiers → [HotKeyScope.system] (works in background)
+/// - No modifiers → [HotKeyScope.inapp] (works when app has focus)
 HotKey? parseHotKey(String hotkeyString) {
-  final parts =
-      hotkeyString.toLowerCase().split('+').map((s) => s.trim()).toList();
-  if (parts.isEmpty) return null;
+  if (hotkeyString.isEmpty) return null;
 
-  final keyLabel = parts.last;
-  final modifierStrings = parts.sublist(0, parts.length - 1);
+  // Space requires special handling: split('+') then trim() would destroy it.
+  final String keyLabel;
+  final List<String> modifierStrings;
+
+  if (hotkeyString == ' ' || hotkeyString.endsWith('+ ')) {
+    // Space is the key part.
+    keyLabel = ' ';
+    final lastPlus = hotkeyString.lastIndexOf('+');
+    modifierStrings = lastPlus > 0
+        ? hotkeyString
+            .substring(0, lastPlus)
+            .toLowerCase()
+            .split('+')
+            .map((s) => s.trim())
+            .toList()
+        : [];
+  } else {
+    final parts = hotkeyString
+        .toLowerCase()
+        .split('+')
+        .map((s) => s.trim())
+        .toList();
+    if (parts.isEmpty) return null;
+    keyLabel = parts.last;
+    modifierStrings = parts.sublist(0, parts.length - 1);
+  }
 
   final LogicalKeyboardKey? logicalKey = _parseLogicalKey(keyLabel);
   if (logicalKey == null) return null;
@@ -24,12 +50,13 @@ HotKey? parseHotKey(String hotkeyString) {
   return HotKey(
     key: logicalKey,
     modifiers: modifiers,
-    scope: HotKeyScope.system,
+    scope: modifiers.isEmpty ? HotKeyScope.inapp : HotKeyScope.system,
   );
 }
 
 LogicalKeyboardKey? _parseLogicalKey(String label) {
   return switch (label) {
+    // Letters
     'a' => LogicalKeyboardKey.keyA,
     'b' => LogicalKeyboardKey.keyB,
     'c' => LogicalKeyboardKey.keyC,
@@ -56,6 +83,18 @@ LogicalKeyboardKey? _parseLogicalKey(String label) {
     'x' => LogicalKeyboardKey.keyX,
     'y' => LogicalKeyboardKey.keyY,
     'z' => LogicalKeyboardKey.keyZ,
+    // Digits
+    '0' => LogicalKeyboardKey.digit0,
+    '1' => LogicalKeyboardKey.digit1,
+    '2' => LogicalKeyboardKey.digit2,
+    '3' => LogicalKeyboardKey.digit3,
+    '4' => LogicalKeyboardKey.digit4,
+    '5' => LogicalKeyboardKey.digit5,
+    '6' => LogicalKeyboardKey.digit6,
+    '7' => LogicalKeyboardKey.digit7,
+    '8' => LogicalKeyboardKey.digit8,
+    '9' => LogicalKeyboardKey.digit9,
+    // F-keys
     'f1' => LogicalKeyboardKey.f1,
     'f2' => LogicalKeyboardKey.f2,
     'f3' => LogicalKeyboardKey.f3,
@@ -68,6 +107,51 @@ LogicalKeyboardKey? _parseLogicalKey(String label) {
     'f10' => LogicalKeyboardKey.f10,
     'f11' => LogicalKeyboardKey.f11,
     'f12' => LogicalKeyboardKey.f12,
+    // Punctuation / symbols
+    '.' => LogicalKeyboardKey.period,
+    ',' => LogicalKeyboardKey.comma,
+    '/' => LogicalKeyboardKey.slash,
+    ';' => LogicalKeyboardKey.semicolon,
+    "'" => LogicalKeyboardKey.quoteSingle,
+    '[' => LogicalKeyboardKey.bracketLeft,
+    ']' => LogicalKeyboardKey.bracketRight,
+    r'\' => LogicalKeyboardKey.backslash,
+    '-' => LogicalKeyboardKey.minus,
+    '=' => LogicalKeyboardKey.equal,
+    '`' => LogicalKeyboardKey.backquote,
+    ' ' => LogicalKeyboardKey.space,
+    // Navigation
+    'enter' => LogicalKeyboardKey.enter,
+    'backspace' => LogicalKeyboardKey.backspace,
+    'tab' => LogicalKeyboardKey.tab,
+    'escape' => LogicalKeyboardKey.escape,
+    'delete' => LogicalKeyboardKey.delete,
+    // Arrows
+    'arrow up' => LogicalKeyboardKey.arrowUp,
+    'arrow down' => LogicalKeyboardKey.arrowDown,
+    'arrow left' => LogicalKeyboardKey.arrowLeft,
+    'arrow right' => LogicalKeyboardKey.arrowRight,
+    // Page navigation
+    'home' => LogicalKeyboardKey.home,
+    'end' => LogicalKeyboardKey.end,
+    'page up' => LogicalKeyboardKey.pageUp,
+    'page down' => LogicalKeyboardKey.pageDown,
+    // Numpad
+    'numpad 0' => LogicalKeyboardKey.numpad0,
+    'numpad 1' => LogicalKeyboardKey.numpad1,
+    'numpad 2' => LogicalKeyboardKey.numpad2,
+    'numpad 3' => LogicalKeyboardKey.numpad3,
+    'numpad 4' => LogicalKeyboardKey.numpad4,
+    'numpad 5' => LogicalKeyboardKey.numpad5,
+    'numpad 6' => LogicalKeyboardKey.numpad6,
+    'numpad 7' => LogicalKeyboardKey.numpad7,
+    'numpad 8' => LogicalKeyboardKey.numpad8,
+    'numpad 9' => LogicalKeyboardKey.numpad9,
+    'numpad add' => LogicalKeyboardKey.numpadAdd,
+    'numpad subtract' => LogicalKeyboardKey.numpadSubtract,
+    'numpad multiply' => LogicalKeyboardKey.numpadMultiply,
+    'numpad decimal' => LogicalKeyboardKey.numpadDecimal,
+    'numpad divide' => LogicalKeyboardKey.numpadDivide,
     _ => null,
   };
 }
