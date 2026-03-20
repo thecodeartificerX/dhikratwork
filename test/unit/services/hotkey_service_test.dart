@@ -1,6 +1,7 @@
 // test/unit/services/hotkey_service_test.dart
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:dhikratwork/services/hotkey_service.dart';
 
 void main() {
@@ -13,6 +14,7 @@ void main() {
       final hotKey = parseHotKey('ctrl+shift+d');
       expect(hotKey, isNotNull);
       expect(hotKey!.key, equals(LogicalKeyboardKey.keyD));
+      expect(hotKey.scope, equals(HotKeyScope.system));
     });
 
     // -----------------------------------------------------------------------
@@ -24,6 +26,7 @@ void main() {
       expect(hotKey, isNotNull);
       expect(hotKey!.key, equals(LogicalKeyboardKey.f9));
       expect(hotKey.modifiers, anyOf(isNull, isEmpty));
+      expect(hotKey.scope, equals(HotKeyScope.inapp));
     });
 
     // -----------------------------------------------------------------------
@@ -112,6 +115,139 @@ void main() {
 
     test('ctrl+mousebutton3 returns null (unrecognised key)', () {
       expect(parseHotKey('ctrl+mousebutton3'), isNull);
+    });
+
+    // -----------------------------------------------------------------
+    // Digit keys
+    // -----------------------------------------------------------------
+
+    test('ctrl+1 returns digit1 with system scope', () {
+      final hotKey = parseHotKey('ctrl+1');
+      expect(hotKey, isNotNull);
+      expect(hotKey!.key, equals(LogicalKeyboardKey.digit1));
+      expect(hotKey.scope, equals(HotKeyScope.system));
+    });
+
+    test('0 (bare digit) returns digit0 with inapp scope', () {
+      final hotKey = parseHotKey('0');
+      expect(hotKey, isNotNull);
+      expect(hotKey!.key, equals(LogicalKeyboardKey.digit0));
+      expect(hotKey.scope, equals(HotKeyScope.inapp));
+    });
+
+    // -----------------------------------------------------------------
+    // Punctuation keys
+    // -----------------------------------------------------------------
+
+    test('. (bare period) returns period with inapp scope', () {
+      final hotKey = parseHotKey('.');
+      expect(hotKey, isNotNull);
+      expect(hotKey!.key, equals(LogicalKeyboardKey.period));
+      expect(hotKey.scope, equals(HotKeyScope.inapp));
+    });
+
+    test('ctrl+. returns period with system scope', () {
+      final hotKey = parseHotKey('ctrl+.');
+      expect(hotKey, isNotNull);
+      expect(hotKey!.key, equals(LogicalKeyboardKey.period));
+      expect(hotKey.scope, equals(HotKeyScope.system));
+    });
+
+    test('ctrl+, returns comma with system scope', () {
+      final hotKey = parseHotKey('ctrl+,');
+      expect(hotKey, isNotNull);
+      expect(hotKey!.key, equals(LogicalKeyboardKey.comma));
+      expect(hotKey.scope, equals(HotKeyScope.system));
+    });
+
+    test('/ (bare slash) returns slash with inapp scope', () {
+      final hotKey = parseHotKey('/');
+      expect(hotKey, isNotNull);
+      expect(hotKey!.key, equals(LogicalKeyboardKey.slash));
+      expect(hotKey.scope, equals(HotKeyScope.inapp));
+    });
+
+    test('ctrl+- returns minus with system scope', () {
+      final hotKey = parseHotKey('ctrl+-');
+      expect(hotKey, isNotNull);
+      expect(hotKey!.key, equals(LogicalKeyboardKey.minus));
+      expect(hotKey.scope, equals(HotKeyScope.system));
+    });
+
+    test('ctrl+= returns equal with system scope', () {
+      final hotKey = parseHotKey('ctrl+=');
+      expect(hotKey, isNotNull);
+      expect(hotKey!.key, equals(LogicalKeyboardKey.equal));
+      expect(hotKey.scope, equals(HotKeyScope.system));
+    });
+
+    // -----------------------------------------------------------------
+    // Navigation and arrow keys
+    // -----------------------------------------------------------------
+
+    test('alt+arrow up returns arrowUp with system scope', () {
+      final hotKey = parseHotKey('alt+arrow up');
+      expect(hotKey, isNotNull);
+      expect(hotKey!.key, equals(LogicalKeyboardKey.arrowUp));
+      expect(hotKey.scope, equals(HotKeyScope.system));
+    });
+
+    test('enter (bare) returns enter with inapp scope', () {
+      final hotKey = parseHotKey('enter');
+      expect(hotKey, isNotNull);
+      expect(hotKey!.key, equals(LogicalKeyboardKey.enter));
+      expect(hotKey.scope, equals(HotKeyScope.inapp));
+    });
+
+    test('ctrl+backspace returns backspace with system scope', () {
+      final hotKey = parseHotKey('ctrl+backspace');
+      expect(hotKey, isNotNull);
+      expect(hotKey!.key, equals(LogicalKeyboardKey.backspace));
+      expect(hotKey.scope, equals(HotKeyScope.system));
+    });
+
+    // -----------------------------------------------------------------
+    // Space (special trim handling)
+    // -----------------------------------------------------------------
+
+    test('bare space returns space with inapp scope', () {
+      final hotKey = parseHotKey(' ');
+      expect(hotKey, isNotNull);
+      expect(hotKey!.key, equals(LogicalKeyboardKey.space));
+      expect(hotKey.scope, equals(HotKeyScope.inapp));
+    });
+
+    test('ctrl+space returns space with system scope', () {
+      final hotKey = parseHotKey('ctrl+ ');
+      expect(hotKey, isNotNull);
+      expect(hotKey!.key, equals(LogicalKeyboardKey.space));
+      expect(hotKey.scope, equals(HotKeyScope.system));
+    });
+
+    // -----------------------------------------------------------------
+    // Numpad keys
+    // -----------------------------------------------------------------
+
+    test('numpad 5 returns numpad5 with inapp scope', () {
+      final hotKey = parseHotKey('numpad 5');
+      expect(hotKey, isNotNull);
+      expect(hotKey!.key, equals(LogicalKeyboardKey.numpad5));
+      expect(hotKey.scope, equals(HotKeyScope.inapp));
+    });
+
+    test('ctrl+numpad add returns numpadAdd with system scope', () {
+      final hotKey = parseHotKey('ctrl+numpad add');
+      expect(hotKey, isNotNull);
+      expect(hotKey!.key, equals(LogicalKeyboardKey.numpadAdd));
+      expect(hotKey.scope, equals(HotKeyScope.system));
+    });
+
+    // -----------------------------------------------------------------
+    // Bare unrecognised key returns null
+    // -----------------------------------------------------------------
+
+    test('nonsense returns null', () {
+      expect(parseHotKey('nonsense'), isNull);
     });
   });
 }
