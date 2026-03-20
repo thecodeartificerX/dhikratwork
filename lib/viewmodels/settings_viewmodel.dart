@@ -265,8 +265,6 @@ class SettingsViewModel extends ChangeNotifier {
       _hotkeyRegistered = true;
       await _settingsRepository.updateSettings(_settings);
     } else {
-      _hotkeyError =
-          'Could not register "$newHotkeyString" — it may be in use by another app.';
       _hotkeyRegistered = false;
     }
 
@@ -277,9 +275,10 @@ class SettingsViewModel extends ChangeNotifier {
     _hotkeyTriggerCallback?.call();
   }
 
-  void _onHotkeyRegistrationFailed() {
-    _hotkeyError =
-        'Failed to register global hotkey. Another application may own this shortcut.';
+  void _onHotkeyRegistrationFailed(String reason) {
+    _hotkeyError = reason == 'unsupported_key'
+        ? 'This key is not supported for hotkey registration.'
+        : 'Could not register hotkey — it may be in use by another app.';
     _hotkeyRegistered = false;
     notifyListeners();
   }
