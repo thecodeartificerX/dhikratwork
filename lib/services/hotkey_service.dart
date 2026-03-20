@@ -181,20 +181,21 @@ class HotkeyService {
   /// Registers [hotkeyString] (e.g., 'ctrl+shift+d') as a system-wide hotkey.
   ///
   /// [onTriggered] is called each time the hotkey fires.
-  /// [onRegistrationFailed] is called if the hotkey is already owned by
-  /// another application.
+  /// [onRegistrationFailed] is called with a reason string if registration
+  /// fails: `'unsupported_key'` if the key cannot be parsed, or
+  /// `'registration_failed'` if the OS rejected the hotkey.
   ///
   /// Returns true if registration succeeded.
   Future<bool> register({
     required String hotkeyString,
     required VoidCallback onTriggered,
-    VoidCallback? onRegistrationFailed,
+    void Function(String reason)? onRegistrationFailed,
   }) async {
     await unregister();
 
     final hotKey = parseHotKey(hotkeyString);
     if (hotKey == null) {
-      onRegistrationFailed?.call();
+      onRegistrationFailed?.call('unsupported_key');
       return false;
     }
 
@@ -209,7 +210,7 @@ class HotkeyService {
     } catch (e) {
       _isRegistered = false;
       _currentHotKey = null;
-      onRegistrationFailed?.call();
+      onRegistrationFailed?.call('registration_failed');
       return false;
     }
   }
