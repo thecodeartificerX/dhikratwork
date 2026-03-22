@@ -4,6 +4,9 @@
 .SYNOPSIS
     Generates a self-signed code signing certificate for MSIX signing.
 .DESCRIPTION
+    NOTE: You usually don't need to run this directly — release.ps1 auto-generates
+    the certificate if it's missing. Use this script only to regenerate with -Force.
+
     Creates a self-signed CodeSigningCert with subject CN=DhikrAtWork Open Source,
     valid for 5 years. Exports the public certificate as DhikrAtWork.cer (to the
     repo root, safe to commit) and the private key as windows\signing\CERTIFICATE.pfx

@@ -22,11 +22,9 @@ flutter test                                    # ~300 unit + widget tests
 flutter test integration_test/ -d windows       # integration tests (needs running window)
 flutter pub run msix:create                     # MSIX package (needs cert configured)
 
-# Release pipeline (Windows)
-# Step 1 — generate self-signed cert (run once per machine; requires admin)
-.\generate-cert.ps1                            # creates windows\signing\CERTIFICATE.pfx and DhikrAtWork.cer
-# Step 2 — build MSIX + zip artifact + create draft GitHub release
-$env:MSIX_CERT_PASSWORD="yourpassword" ; .\release.ps1 -Version 0.2.0 -Changelog "Release notes here"
+# Release pipeline (Windows) — auto-generates cert on first run
+.\release.ps1 -Version 0.2.0 -Changelog "Release notes here"     # prompts for cert password if needed
+$env:MSIX_CERT_PASSWORD="pw" ; .\release.ps1 -Version 0.2.0 -Changelog "Notes"  # skip prompt
 
 # Release pipeline (macOS) — run AFTER release.ps1 on Windows
 ./release.sh 0.2.0                                            # build app + finalize and publish release
@@ -69,7 +67,7 @@ dist/          # README-windows.txt, README-macos.txt — distribution README te
 - **AppLocator.reset()**: Must be called in teardown of any test that calls `AppLocator.initialize()`.
 - **Build cache corruption on Windows**: If `flutter build windows` fails with `PathExistsException` or `PathNotFoundException` for `sqlite3.dll` in `native_assets`, kill any running `dhikratwork.exe` processes, then `rm -rf build .dart_tool` and rebuild. `flutter clean` alone may fail to remove locked files.
 - **Session lifecycle guard**: Any code that creates a new session must end the existing `_activeSession` first (check `_activeSession?.id != null`). See `setActiveDhikr`, `startSession`, `resetSessionCount` in `CounterViewModel` — all follow this pattern. Missing it causes duplicate open sessions and flaky tests on Linux CI (different sort order for same-timestamp records).
-- **MSIX cert password via env var**: Never hard-code — pass via `$env:MSIX_CERT_PASSWORD`. See Release Workflow for details.
+- **MSIX cert password**: `release.ps1` prompts interactively if `$env:MSIX_CERT_PASSWORD` is not set. Pre-set the env var to skip the prompt.
 - **Self-signed cert install required**: End-users must run `Install.bat` as admin before MSIX will install. Without it, Windows blocks with "publisher can't be verified".
 - **appcast.xml ED25519 signature**: Never ship with `YOUR_ED25519_SIGNATURE` — `release.sh` regenerates it automatically via `sign_update`.
 - **Flutter generated files false diff**: After `flutter pub get` on Windows, `linux/flutter/`, `macos/Flutter/`, and `windows/flutter/` generated files show as modified (LF→CRLF). These have no real changes — restore with `git checkout` rather than committing.
@@ -91,14 +89,13 @@ Two-step process: Windows first (creates draft release), then macOS (publishes i
 
 ### Step 1 — Build MSIX + Draft Release (Windows)
 
-Generate the cert once per machine (requires admin, commits `DhikrAtWork.cer`):
 ```powershell
-.\generate-cert.ps1
+.\release.ps1 -Version X.Y.Z -Changelog "What changed in this release"
 ```
 
-Then run the release pipeline:
+The script auto-generates the signing certificate on first run (prompts for a password). On subsequent runs, pre-set the password or let it prompt:
 ```powershell
-$env:MSIX_CERT_PASSWORD = "your-cert-password"
+$env:MSIX_CERT_PASSWORD = "your-cert-password"   # optional — skips the prompt
 .\release.ps1 -Version X.Y.Z -Changelog "What changed in this release"
 ```
 
@@ -121,7 +118,7 @@ This builds the macOS app bundle, signs the zip with Sparkle, updates `appcast.x
 
 ## Release Checklist
 
-- [ ] Run `.\generate-cert.ps1` and commit `DhikrAtWork.cer` to the repo
+- [ ] Run `.\release.ps1` once to auto-generate the signing certificate (or `.\generate-cert.ps1` manually)
 - [ ] Replace `YOUR_ED25519_SIGNATURE` in `appcast.xml`
 - [ ] Provide `.ico` tray icon for Windows production (PNG fallback works for dev)
 - [ ] Add macOS app icon (`.icns`) in `macos/Runner/Assets.xcassets`
