@@ -109,8 +109,11 @@ function Invoke-Command-Checked {
         [string]$WorkingDirectory = $ProjectRoot
     )
 
+    # Resolve full path so .bat/.cmd files (e.g. flutter.bat) work with Process.Start
+    $resolvedExe = (Get-Command $Executable -ErrorAction Stop).Source
+
     $psi = [System.Diagnostics.ProcessStartInfo]::new()
-    $psi.FileName               = $Executable
+    $psi.FileName               = $resolvedExe
     $psi.Arguments              = $Arguments -join ' '
     $psi.WorkingDirectory       = $WorkingDirectory
     $psi.UseShellExecute        = $false
