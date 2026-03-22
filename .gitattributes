@@ -1,0 +1,21 @@
+# Auto-detect text files and normalize line endings
+* text=auto
+
+# Dart sources — always LF
+*.dart text eol=lf
+
+# Shell scripts — always LF
+*.sh text eol=lf
+
+# PowerShell — always CRLF (Windows convention)
+*.ps1 text eol=crlf
+
+# Config files — always LF
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+
+# Binary assets
+*.png binary
+*.jpeg binary
+*.ico binary

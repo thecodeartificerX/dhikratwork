@@ -43,3 +43,21 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Signing certificates
+*.pfx
+*.p12
+*.pem
+*.key
+
+# Environment files
+.env
+.env.*
+
+# Claude / AI tooling artifacts
+skills-lock.json
+.superpowers/
+docs/superpowers/
+
+# Image generation specs (not contributor-facing)
+docs/screenshots/*.json

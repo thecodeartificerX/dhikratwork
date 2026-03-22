@@ -2,13 +2,13 @@
 <AppInstaller
   xmlns="http://schemas.microsoft.com/appx/appinstaller/2017/2"
   Version="1.0.0.0"
-  Uri="https://github.com/YOUR_ORG/dhikratwork/releases/latest/download/DhikrAtWork.appinstaller">
+  Uri="https://github.com/thecodeartificerX/dhikratwork/releases/latest/download/DhikrAtWork.appinstaller">
 
   <MainPackage
     Name="com.dhikratwork.app"
     Version="1.0.0.0"
     Publisher="CN=DhikrAtWork"
-    Uri="https://github.com/YOUR_ORG/dhikratwork/releases/latest/download/dhikratwork.msix"
+    Uri="https://github.com/thecodeartificerX/dhikratwork/releases/latest/download/dhikratwork.msix"
     ProcessorArchitecture="x64" />
 
   <UpdateSettings>

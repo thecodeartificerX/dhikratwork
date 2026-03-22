@@ -20,7 +20,7 @@ import 'package:auto_updater/auto_updater.dart';
 /// Sparkle verifies the signature before downloading any update.
 class UpdateService {
   static const String _appcastUrl =
-      'https://raw.githubusercontent.com/YOUR_ORG/dhikratwork/main/appcast.xml';
+      'https://raw.githubusercontent.com/thecodeartificerX/dhikratwork/main/appcast.xml';
 
   /// Number of seconds between automatic background update checks.
   /// Default: 86400 (24 hours).
