@@ -11,6 +11,8 @@ A desktop dhikr counter that stays on your screen while you work. Track your dai
 [<img src="https://img.shields.io/badge/Download_for_Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Download for Windows" height="40">](https://github.com/thecodeartificerX/dhikratwork/releases/latest)
 [<img src="https://img.shields.io/badge/Download_for_macOS-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Download for macOS" height="40">](https://github.com/thecodeartificerX/dhikratwork/releases/latest)
 
+*macOS build coming soon — requires a macOS contributor. Windows-only for now.*
+
 ---
 
 ## What It Does
@@ -71,6 +73,8 @@ Add your own custom dhikrs with Arabic text, transliteration, translation, and o
 3. Extract and run `dhikratwork.exe` (Windows) or `DhikrAtWork.app` (macOS)
 
 No installer needed. All data is stored locally in SQLite.
+
+> **Note:** These builds are unsigned. Windows may show a SmartScreen warning on first launch — click "More info" then "Run anyway". On macOS, right-click the app and select "Open" to bypass Gatekeeper. Code signing certificates cost money; unsigned builds are functionally identical.
 
 ### Build From Source
 

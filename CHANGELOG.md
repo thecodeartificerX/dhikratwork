@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.0] - 2026-03-22
 
+> **Windows-only release.** macOS builds coming soon — requires a macOS contributor.
+
 ### Added
 - Initial open-source release
 - Compact always-on-top counter bar (520x100) with drag-anywhere positioning
