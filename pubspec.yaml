@@ -1,7 +1,7 @@
 name: dhikratwork
 description: "DhikrAtWork — Islamic dhikr tracking for desktop. Windows + macOS."
 publish_to: 'none'
-version: 0.0.1+3
+version: 0.1.0+4
 homepage: https://github.com/thecodeartificerX/dhikratwork
 repository: https://github.com/thecodeartificerX/dhikratwork
 issue_tracker: https://github.com/thecodeartificerX/dhikratwork/issues
@@ -55,7 +55,7 @@ msix_config:
   display_name: DhikrAtWork
   publisher_display_name: DhikrAtWork
   identity_name: com.dhikratwork.app
-  msix_version: 0.0.1.0
+  msix_version: 0.1.0.0
   logo_path: assets/icons/app_icon.png
   start_menu_icon_path: assets/icons/app_icon.png
   tile_icon_path: assets/icons/app_icon.png
