@@ -89,6 +89,22 @@ class StatsRepository {
   }
 
   // -------------------------------------------------------------------------
+  // getTotalCountForDhikrOnDate
+  // -------------------------------------------------------------------------
+
+  /// Returns the sum of [total_count] for a single [dhikrId] on [date].
+  /// Returns 0 if no row exists.
+  Future<int> getTotalCountForDhikrOnDate(int dhikrId, String date) async {
+    final rows = await _db.rawQuery(
+      'SELECT COALESCE(SUM($cSummaryTotalCount), 0) AS total '
+      'FROM $tDailySummary '
+      'WHERE $cSummaryDhikrId = ? AND $cSummaryDate = ?',
+      [dhikrId, date],
+    );
+    return (rows.first['total'] as num?)?.toInt() ?? 0;
+  }
+
+  // -------------------------------------------------------------------------
   // getTotalCountForDhikr
   // -------------------------------------------------------------------------
 

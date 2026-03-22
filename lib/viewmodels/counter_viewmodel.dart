@@ -63,12 +63,31 @@ class CounterViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      // End old session if one exists.
+      if (_activeSession?.id != null) {
+        await _sessionRepository.endSession(_activeSession!.id!);
+        _activeSession = null;
+      }
+
       _activeDhikr = await _dhikrRepository.getById(dhikrId);
       await _settingsRepository.setActiveDhikr(dhikrId);
 
-      // Load today's count for this dhikr.
+      // Load today's count for this specific dhikr (not global).
       final today = _todayDateString();
-      _todayCount = await _statsRepository.getTotalCountForDate(today);
+      _todayCount =
+          await _statsRepository.getTotalCountForDhikrOnDate(dhikrId, today);
+
+      // Load or create session for the new dhikr.
+      final openSession =
+          await _sessionRepository.getActiveSession(dhikrId);
+      if (openSession != null) {
+        _activeSession = openSession;
+        _sessionCount = openSession.count;
+      } else {
+        _sessionCount = 0;
+        await _sessionRepository.createSession(dhikrId, kSourceMainApp);
+        _activeSession = await _sessionRepository.getActiveSession(dhikrId);
+      }
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -185,7 +204,8 @@ class CounterViewModel extends ChangeNotifier {
     }
 
     final today = _todayDateString();
-    _todayCount = await _statsRepository.getTotalCountForDate(today);
+    _todayCount = await _statsRepository.getTotalCountForDhikrOnDate(
+        activeDhikrId, today);
     notifyListeners();
   }
 

@@ -17,7 +17,8 @@ class StatsBarChart extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final entries = data.entries.toList();
     final maxY = (entries.map((e) => e.value).reduce((a, b) => a > b ? a : b) * 1.2)
-        .toDouble();
+        .toDouble()
+        .clamp(5.0, double.infinity);
 
     return BarChart(
       BarChartData(

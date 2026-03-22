@@ -8,7 +8,7 @@
 PRODUCT_NAME = dhikratwork
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.dhikratwork
+PRODUCT_BUNDLE_IDENTIFIER = com.dhikratwork.app
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 DhikrAtWork. All rights reserved.

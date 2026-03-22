@@ -16,7 +16,8 @@ class StatsLineChart extends StatelessWidget {
 
     final colorScheme = Theme.of(context).colorScheme;
     final maxY = (data.map((e) => e.value).reduce((a, b) => a > b ? a : b) * 1.2)
-        .toDouble();
+        .toDouble()
+        .clamp(5.0, double.infinity);
 
     final spots = data.asMap().entries.map((entry) {
       return FlSpot(entry.key.toDouble(), entry.value.value.toDouble());

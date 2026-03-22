@@ -3,11 +3,55 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:screen_retriever/screen_retriever.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'package:dhikratwork/viewmodels/app_shell_viewmodel.dart';
 import 'package:dhikratwork/views/compact/compact_counter_bar.dart';
 import 'package:dhikratwork/views/expanded/expanded_shell.dart';
+
+/// Clamps [position] so a window of [windowSize] is fully within the
+/// nearest display's visible work area.
+Future<Offset> _clampToScreen(Offset position, Size windowSize) async {
+  try {
+    final displays = await screenRetriever.getAllDisplays();
+    if (displays.isEmpty) return position;
+
+    // Find display whose work area contains the window center.
+    final center = Offset(
+      position.dx + windowSize.width / 2,
+      position.dy + windowSize.height / 2,
+    );
+
+    Display target = displays.first;
+    for (final d in displays) {
+      final pos = d.visiblePosition ?? Offset.zero;
+      final sz = d.visibleSize ?? d.size;
+      final rect = Rect.fromLTWH(pos.dx, pos.dy, sz.width, sz.height);
+      if (rect.contains(center)) {
+        target = d;
+        break;
+      }
+    }
+
+    final areaPos = target.visiblePosition ?? Offset.zero;
+    final areaSz = target.visibleSize ?? target.size;
+
+    return Offset(
+      position.dx.clamp(
+        areaPos.dx,
+        areaPos.dx + areaSz.width - windowSize.width,
+      ),
+      position.dy.clamp(
+        areaPos.dy,
+        areaPos.dy + areaSz.height - windowSize.height,
+      ),
+    );
+  } catch (_) {
+    // screen_retriever not available (test environments, etc.).
+    return position;
+  }
+}
 
 /// Root UI widget that switches between [CompactCounterBar] and [ExpandedShell]
 /// based on [AppShellViewModel.mode].
@@ -47,11 +91,15 @@ class _AppShellState extends State<AppShell> {
         await windowManager.setAlignment(Alignment.center);
       } else {
         final vm = context.read<AppShellViewModel>();
-        await windowManager.setSize(const Size(360, 60));
+        await windowManager.setSize(const Size(520, 100));
         final savedX = vm.compactPositionX;
         final savedY = vm.compactPositionY;
         if (savedX != null && savedY != null) {
-          await windowManager.setPosition(Offset(savedX, savedY));
+          final clamped = await _clampToScreen(
+            Offset(savedX, savedY),
+            const Size(520, 100),
+          );
+          await windowManager.setPosition(clamped);
         }
         await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
         await windowManager.setSkipTaskbar(true);
@@ -120,7 +168,12 @@ class _DraggableCompactBar extends StatelessWidget {
         try {
           final vm = context.read<AppShellViewModel>();
           final position = await windowManager.getPosition();
-          await vm.saveCompactPosition(position.dx, position.dy);
+          const compactSize = Size(520, 100);
+          final clamped = await _clampToScreen(position, compactSize);
+          if (clamped != position) {
+            await windowManager.setPosition(clamped);
+          }
+          await vm.saveCompactPosition(clamped.dx, clamped.dy);
         } catch (_) {
           // Not available in test environments.
         }

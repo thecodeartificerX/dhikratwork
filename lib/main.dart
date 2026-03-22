@@ -19,6 +19,7 @@ import 'package:dhikratwork/repositories/streak_repository.dart';
 import 'package:dhikratwork/services/database_service.dart';
 import 'package:dhikratwork/services/subscription_service.dart';
 import 'package:dhikratwork/services/tray_service.dart';
+import 'package:dhikratwork/services/update_service.dart';
 import 'package:dhikratwork/viewmodels/app_shell_viewmodel.dart';
 import 'package:dhikratwork/viewmodels/counter_viewmodel.dart';
 import 'package:dhikratwork/viewmodels/dhikr_library_viewmodel.dart';
@@ -199,18 +200,12 @@ class _SplashThenAppState extends State<SplashThenApp> {
 /// Configures the main window as a small, always-on-top compact bar
 /// positioned in the top-right corner of the screen.
 ///
-/// NOTE: For production builds, also patch:
-///   - windows/runner/main.cpp: remove window.Show(), add SetQuitOnClose(false)
-///   - macos/Runner/AppDelegate.swift: return false from
-///     applicationShouldTerminateAfterLastWindowClosed
-///   - macos/Runner/DebugProfile.entitlements: disable sandbox
-/// These native file changes are required for hotkey_manager and tray_manager.
 Future<void> _initMainWindow() async {
   await windowManager.ensureInitialized();
 
   const windowOptions = WindowOptions(
     title: 'DhikrAtWork',
-    size: Size(360, 60),
+    size: Size(520, 100),
     backgroundColor: Colors.transparent,
     skipTaskbar: true,
     titleBarStyle: TitleBarStyle.hidden,
@@ -269,6 +264,11 @@ class _DhikrAtWorkAppState extends State<DhikrAtWorkApp>
 
     // Resume any active dhikr session from the previous run.
     await counterVm.loadActiveSession();
+
+    if (!mounted) return;
+
+    // Initialize auto-updater (Sparkle on macOS, no-op on Windows).
+    await UpdateService().initialize();
 
     if (!mounted) return;
 

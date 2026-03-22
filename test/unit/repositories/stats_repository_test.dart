@@ -225,6 +225,46 @@ void main() {
     });
 
     // -----------------------------------------------------------------------
+    // getTotalCountForDhikrOnDate
+    // -----------------------------------------------------------------------
+
+    group('getTotalCountForDhikrOnDate', () {
+      test('returns 0 when no rows for dhikr on date', () async {
+        final dhikrId = await insertDhikr('No Count On Date');
+        final total =
+            await repo.getTotalCountForDhikrOnDate(dhikrId, '2099-12-31');
+        expect(total, equals(0));
+      });
+
+      test('returns count for specific dhikr on date', () async {
+        final idA = await insertDhikr('Per Dhikr A');
+        final idB = await insertDhikr('Per Dhikr B');
+
+        await repo.upsertDailySummary(idA, '2026-03-20', 33);
+        await repo.upsertDailySummary(idB, '2026-03-20', 11);
+
+        final totalA =
+            await repo.getTotalCountForDhikrOnDate(idA, '2026-03-20');
+        expect(totalA, equals(33));
+
+        final totalB =
+            await repo.getTotalCountForDhikrOnDate(idB, '2026-03-20');
+        expect(totalB, equals(11));
+      });
+
+      test('does not include counts from other dates', () async {
+        final dhikrId = await insertDhikr('Date Isolated');
+
+        await repo.upsertDailySummary(dhikrId, '2026-03-19', 100);
+        await repo.upsertDailySummary(dhikrId, '2026-03-20', 50);
+
+        final total =
+            await repo.getTotalCountForDhikrOnDate(dhikrId, '2026-03-20');
+        expect(total, equals(50));
+      });
+    });
+
+    // -----------------------------------------------------------------------
     // getCountsByDhikrForPeriod
     // -----------------------------------------------------------------------
 

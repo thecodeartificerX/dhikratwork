@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:window_manager/window_manager.dart';
 import 'package:dhikratwork/app/theme.dart';
 import 'package:dhikratwork/viewmodels/app_shell_viewmodel.dart';
 import 'package:dhikratwork/viewmodels/counter_viewmodel.dart';
@@ -25,7 +26,7 @@ class CompactCounterBar extends StatelessWidget {
     }
 
     return Container(
-      height: 60,
+      height: 100,
       decoration: BoxDecoration(
         color: kDeepNavy,
         borderRadius: BorderRadius.circular(12),
@@ -38,13 +39,14 @@ class CompactCounterBar extends StatelessWidget {
           ),
         ],
       ),
+      padding: const EdgeInsets.symmetric(vertical: 14),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           const _DragHandle(),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,16 +58,18 @@ class CompactCounterBar extends StatelessWidget {
                       style: GoogleFonts.amiri(
                         fontSize: 16,
                         color: kGoldAccent,
-                        height: 1.3,
+                        height: 1.2,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  const SizedBox(height: 6),
                   Text(
                     activeDhikr.transliteration,
                     style: GoogleFonts.inter(
-                      fontSize: 10,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
                       color: Colors.white70,
                     ),
                     maxLines: 1,
@@ -79,7 +83,12 @@ class CompactCounterBar extends StatelessWidget {
           _CountArea(counterVm: counterVm),
           const _VerticalDivider(),
           _HotkeyBadge(hotkeyString: settingsVm.hotkeyString),
-          _ExpandButton(onTap: () => appShellVm.setMode(AppMode.expanded)),
+          _WindowControls(
+            onMinimize: () async {
+              try { await windowManager.hide(); } catch (_) {}
+            },
+            onExpand: () => appShellVm.setMode(AppMode.expanded),
+          ),
         ],
       ),
     );
@@ -98,7 +107,7 @@ class _NoActiveDhikrBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 60,
+      height: 100,
       decoration: BoxDecoration(
         color: kDeepNavy,
         borderRadius: BorderRadius.circular(12),
@@ -121,13 +130,19 @@ class _NoActiveDhikrBar extends StatelessWidget {
               child: Text(
                 'No dhikr selected',
                 style: GoogleFonts.inter(
-                  fontSize: 13,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
                   color: Colors.white54,
                 ),
               ),
             ),
           ),
-          _ExpandButton(onTap: onExpand),
+          _WindowControls(
+            onMinimize: () async {
+              try { await windowManager.hide(); } catch (_) {}
+            },
+            onExpand: onExpand,
+          ),
         ],
       ),
     );
@@ -144,7 +159,7 @@ class _DragHandle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Icon(
         Icons.drag_indicator,
         color: Colors.white38,
@@ -168,18 +183,20 @@ class _CountArea extends StatelessWidget {
     return GestureDetector(
       onSecondaryTapDown: (details) => _showContextMenu(context, details),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 18),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             _CountDisplay(
               label: 'Session',
               count: counterVm.sessionCount,
+              onReset: counterVm.resetSessionCount,
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 24),
             _CountDisplay(
               label: 'Today',
               count: counterVm.todayCount,
+              onReset: counterVm.resetTodayCount,
             ),
           ],
         ),
@@ -226,26 +243,64 @@ class _CountArea extends StatelessWidget {
 class _CountDisplay extends StatelessWidget {
   final String label;
   final int count;
+  final Future<void> Function()? onReset;
 
-  const _CountDisplay({required this.label, required this.count});
+  const _CountDisplay({
+    required this.label,
+    required this.count,
+    this.onReset,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          '$count',
-          style: GoogleFonts.inter(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: kGoldAccent,
-          ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '$count',
+              style: GoogleFonts.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: kGoldAccent,
+              ),
+            ),
+            if (onReset != null)
+              Tooltip(
+                message: 'Reset $label',
+                preferBelow: false,
+                verticalOffset: 14,
+                textStyle: GoogleFonts.inter(fontSize: 10, color: Colors.white),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade800,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                waitDuration: const Duration(milliseconds: 400),
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: onReset,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 5),
+                      child: Icon(
+                        Icons.restart_alt_rounded,
+                        size: 15,
+                        color: Colors.white38,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
+        const SizedBox(height: 5),
         Text(
           label,
           style: GoogleFonts.inter(
-            fontSize: 9,
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
             color: Colors.white54,
           ),
         ),
@@ -265,7 +320,7 @@ class _VerticalDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 1,
-      height: 32,
+      height: 36,
       color: kGoldAccent.withValues(alpha: 0.2),
     );
   }
@@ -283,9 +338,9 @@ class _HotkeyBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
           color: kGoldAccent.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(6),
@@ -294,7 +349,7 @@ class _HotkeyBadge extends StatelessWidget {
         child: Text(
           hotkeyString,
           style: GoogleFonts.inter(
-            fontSize: 10,
+            fontSize: 11,
             color: kGoldAccent,
             fontWeight: FontWeight.w600,
           ),
@@ -305,23 +360,49 @@ class _HotkeyBadge extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Expand button
+// Window controls (minimize + expand)
 // ---------------------------------------------------------------------------
 
-class _ExpandButton extends StatelessWidget {
-  final VoidCallback onTap;
+class _WindowControls extends StatelessWidget {
+  final VoidCallback onMinimize;
+  final VoidCallback onExpand;
 
-  const _ExpandButton({required this.onTap});
+  const _WindowControls({required this.onMinimize, required this.onExpand});
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: onTap,
-      icon: const Icon(Icons.open_in_full),
-      iconSize: 16,
-      color: Colors.white54,
-      tooltip: 'Expand',
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            onPressed: onMinimize,
+            icon: const Icon(Icons.minimize),
+            iconSize: 14,
+            color: Colors.white54,
+            constraints: const BoxConstraints(),
+            padding: const EdgeInsets.all(4),
+            style: const ButtonStyle(
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            tooltip: 'Minimize to tray',
+          ),
+          const SizedBox(height: 4),
+          IconButton(
+            onPressed: onExpand,
+            icon: const Icon(Icons.open_in_full),
+            iconSize: 14,
+            color: Colors.white54,
+            constraints: const BoxConstraints(),
+            padding: const EdgeInsets.all(4),
+            style: const ButtonStyle(
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            tooltip: 'Expand',
+          ),
+        ],
+      ),
     );
   }
 }

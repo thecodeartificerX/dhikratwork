@@ -158,6 +158,57 @@ void main() {
     expect(ended, isNotEmpty);
   });
 
+  test('setActiveDhikr loads per-dhikr today count, not global', () async {
+    // Seed counts: dhikr 1 has 33 today, dhikr 2 has 11 today.
+    final today = DateTime.now();
+    final dateStr =
+        '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+    await statsRepo.upsertDailySummary(1, dateStr, 33);
+    await statsRepo.upsertDailySummary(2, dateStr, 11);
+
+    await vm.setActiveDhikr(1);
+    expect(vm.todayCount, equals(33)); // Should be 33, not 44
+
+    await vm.setActiveDhikr(2);
+    expect(vm.todayCount, equals(11)); // Should be 11, not 44
+  });
+
+  test('setActiveDhikr resets session count for new dhikr', () async {
+    settingsRepo.seed(const UserSettings(
+      activeDhikrId: 1,
+      createdAt: '2026-01-01T00:00:00',
+    ));
+
+    // Increment dhikr 1 session count to 3.
+    await vm.incrementActiveDhikr(source: 'hotkey');
+    await vm.incrementActiveDhikr(source: 'hotkey');
+    await vm.incrementActiveDhikr(source: 'hotkey');
+    expect(vm.sessionCount, equals(3));
+
+    // Switch to dhikr 2 — session count should reset to 0.
+    await vm.setActiveDhikr(2);
+    expect(vm.sessionCount, equals(0));
+  });
+
+  test('loadActiveSession loads per-dhikr today count, not global', () async {
+    final today = DateTime.now();
+    final dateStr =
+        '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+    // Seed counts: dhikr 1 has 20, dhikr 2 has 30.
+    await statsRepo.upsertDailySummary(1, dateStr, 20);
+    await statsRepo.upsertDailySummary(2, dateStr, 30);
+
+    settingsRepo.seed(const UserSettings(
+      activeDhikrId: 1,
+      createdAt: '2026-01-01T00:00:00',
+    ));
+
+    await vm.loadActiveSession();
+
+    // Should be 20 (dhikr 1 only), not 50 (global).
+    expect(vm.todayCount, equals(20));
+  });
+
   test('resetTodayCount resets todayCount to 0', () async {
     await vm.setActiveDhikr(1);
     await vm.increment();

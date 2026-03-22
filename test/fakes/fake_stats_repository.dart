@@ -68,6 +68,13 @@ class FakeStatsRepository implements StatsRepository {
   }
 
   @override
+  Future<int> getTotalCountForDhikrOnDate(int dhikrId, String date) async {
+    return _store.values
+        .where((s) => s.dhikrId == dhikrId && s.date == date)
+        .fold<int>(0, (sum, s) => sum + s.totalCount);
+  }
+
+  @override
   Future<int> getTotalCountForDhikr(int dhikrId) async {
     return _store.values
         .where((s) => s.dhikrId == dhikrId)
