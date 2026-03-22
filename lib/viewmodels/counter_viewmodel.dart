@@ -105,6 +105,9 @@ class CounterViewModel extends ChangeNotifier {
   /// Start a new session for [dhikrId]. Call before the user begins counting
   /// via the widget toolbar or main window.
   Future<void> startSession(int dhikrId) async {
+    if (_activeSession?.id != null) {
+      await _sessionRepository.endSession(_activeSession!.id!);
+    }
     _sessionCount = 0;
     await _sessionRepository.createSession(dhikrId, 'main_app');
     // Re-fetch so we have the full object including assigned id.
