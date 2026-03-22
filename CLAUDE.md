@@ -27,6 +27,9 @@ flutter pub run msix:create                     # MSIX package (needs cert confi
 .\generate-cert.ps1                            # creates windows\signing\CERTIFICATE.pfx and DhikrAtWork.cer
 # Step 2 — build MSIX + zip artifact + create draft GitHub release
 $env:MSIX_CERT_PASSWORD="yourpassword" ; .\release.ps1 -Version 0.2.0 -Changelog "Release notes here"
+
+# Release pipeline (macOS) — run AFTER release.ps1 on Windows
+./release.sh 0.2.0                                            # build app + finalize and publish release
 ```
 
 ## Architecture
@@ -66,9 +69,9 @@ dist/          # README-windows.txt, README-macos.txt — distribution README te
 - **AppLocator.reset()**: Must be called in teardown of any test that calls `AppLocator.initialize()`.
 - **Build cache corruption on Windows**: If `flutter build windows` fails with `PathExistsException` or `PathNotFoundException` for `sqlite3.dll` in `native_assets`, kill any running `dhikratwork.exe` processes, then `rm -rf build .dart_tool` and rebuild. `flutter clean` alone may fail to remove locked files.
 - **Session lifecycle guard**: Any code that creates a new session must end the existing `_activeSession` first (check `_activeSession?.id != null`). See `setActiveDhikr`, `startSession`, `resetSessionCount` in `CounterViewModel` — all follow this pattern. Missing it causes duplicate open sessions and flaky tests on Linux CI (different sort order for same-timestamp records).
-- **MSIX cert password via env var**: `release.ps1` reads the cert password from `$env:MSIX_CERT_PASSWORD`. Never hard-code the password. Set `$env:MSIX_CERT_PASSWORD` in the shell before running `release.ps1` or `flutter pub run msix:create`. The `.pfx` file (`windows\signing\CERTIFICATE.pfx`) is git-ignored; generate it once per machine with `.\generate-cert.ps1`.
-- **Self-signed cert install required**: The MSIX package built with the self-signed cert will only install on machines that trust that cert. End-users must run the provided installer script (`Install.bat`) as admin, or import `DhikrAtWork.cer` into `Trusted Root Certification Authorities` manually, before installing the MSIX. Without this step, Windows shows "publisher can't be verified" and blocks installation.
-- **appcast.xml ED25519 signature**: After each release build, regenerate the `sparkle:edSignature` value in `appcast.xml` using the Sparkle `sign_update` tool with the private key. Never ship a release with `YOUR_ED25519_SIGNATURE` still present — the macOS auto-updater will reject the update silently.
+- **MSIX cert password via env var**: Never hard-code — pass via `$env:MSIX_CERT_PASSWORD`. See Release Workflow for details.
+- **Self-signed cert install required**: End-users must run `Install.bat` as admin before MSIX will install. Without it, Windows blocks with "publisher can't be verified".
+- **appcast.xml ED25519 signature**: Never ship with `YOUR_ED25519_SIGNATURE` — `release.sh` regenerates it automatically via `sign_update`.
 - **Flutter generated files false diff**: After `flutter pub get` on Windows, `linux/flutter/`, `macos/Flutter/`, and `windows/flutter/` generated files show as modified (LF→CRLF). These have no real changes — restore with `git checkout` rather than committing.
 - **macOS scripts must use BSD tools**: `grep -oP` (PCRE) is unavailable on macOS. Use `sed -nE` with capture groups instead. Always verify bash scripts target BSD `grep`/`sed`/`awk` when writing for macOS.
 
@@ -119,12 +122,7 @@ This builds the macOS app bundle, signs the zip with Sparkle, updates `appcast.x
 ## Release Checklist
 
 - [ ] Run `.\generate-cert.ps1` and commit `DhikrAtWork.cer` to the repo
-- [x] Replace `YOUR_CERT_PASSWORD` in `pubspec.yaml` msix_config — resolved: cert password now read from `$env:MSIX_CERT_PASSWORD` env var via `release.ps1`; never hard-coded
-- [x] Replace `YOUR_ORG` in msix_config `uri` field
 - [ ] Replace `YOUR_ED25519_SIGNATURE` in `appcast.xml`
-- [x] Replace `YOUR_ORG` in `README.md` (5 occurrences)
-- [x] Replace `YOUR_ORG` in `lib/services/update_service.dart` appcast URL
 - [ ] Provide `.ico` tray icon for Windows production (PNG fallback works for dev)
 - [ ] Add macOS app icon (`.icns`) in `macos/Runner/Assets.xcassets`
 - [ ] Set Apple Developer Team ID in Xcode project for macOS code signing
-- [x] Choose and add a LICENSE file
