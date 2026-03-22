@@ -69,6 +69,8 @@ dist/          # README-windows.txt, README-macos.txt — distribution README te
 - **MSIX cert password via env var**: `release.ps1` reads the cert password from `$env:MSIX_CERT_PASSWORD`. Never hard-code the password. Set `$env:MSIX_CERT_PASSWORD` in the shell before running `release.ps1` or `flutter pub run msix:create`. The `.pfx` file (`windows\signing\CERTIFICATE.pfx`) is git-ignored; generate it once per machine with `.\generate-cert.ps1`.
 - **Self-signed cert install required**: The MSIX package built with the self-signed cert will only install on machines that trust that cert. End-users must run the provided installer script (`Install.bat`) as admin, or import `DhikrAtWork.cer` into `Trusted Root Certification Authorities` manually, before installing the MSIX. Without this step, Windows shows "publisher can't be verified" and blocks installation.
 - **appcast.xml ED25519 signature**: After each release build, regenerate the `sparkle:edSignature` value in `appcast.xml` using the Sparkle `sign_update` tool with the private key. Never ship a release with `YOUR_ED25519_SIGNATURE` still present — the macOS auto-updater will reject the update silently.
+- **Flutter generated files false diff**: After `flutter pub get` on Windows, `linux/flutter/`, `macos/Flutter/`, and `windows/flutter/` generated files show as modified (LF→CRLF). These have no real changes — restore with `git checkout` rather than committing.
+- **macOS scripts must use BSD tools**: `grep -oP` (PCRE) is unavailable on macOS. Use `sed -nE` with capture groups instead. Always verify bash scripts target BSD `grep`/`sed`/`awk` when writing for macOS.
 
 ## Testing
 
