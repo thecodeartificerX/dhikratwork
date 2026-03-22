@@ -16,20 +16,12 @@ class SettingsTab extends StatefulWidget {
 }
 
 class _SettingsTabState extends State<SettingsTab> {
-  final _emailController = TextEditingController();
-
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<SettingsViewModel>().loadSettings();
     });
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    super.dispose();
   }
 
   Future<void> _recordHotkey() async {
@@ -40,12 +32,6 @@ class _SettingsTabState extends State<SettingsTab> {
     if (newHotkey != null && mounted) {
       await context.read<SettingsViewModel>().changeHotkey(newHotkey);
     }
-  }
-
-  Future<void> _verifySubscription() async {
-    final email = _emailController.text.trim();
-    if (email.isEmpty) return;
-    await context.read<SettingsViewModel>().verifySubscription(email);
   }
 
   @override
@@ -126,91 +112,22 @@ class _SettingsTabState extends State<SettingsTab> {
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   children: [
-                    if (vm.isSubscribed) ...[
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.verified,
-                            color: theme.colorScheme.primary,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Subscribed',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (vm.subscriptionEmail != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          vm.subscriptionEmail!,
-                          style: theme.textTheme.bodySmall,
-                        ),
-                      ],
-                    ] else ...[
-                      Text(
-                        'Unlock premium features with a subscription.',
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                      const SizedBox(height: 12),
-                      FilledButton(
-                        onPressed: () => _launchUrl(
-                          'https://dhikratwork.app/subscribe',
-                        ),
-                        child: const Text('Subscribe — \$5/month'),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Already subscribed? Verify your email:',
-                        style: theme.textTheme.bodySmall,
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: _emailController,
-                              decoration: const InputDecoration(
-                                hintText: 'your@email.com',
-                                isDense: true,
-                              ),
-                              keyboardType: TextInputType.emailAddress,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          OutlinedButton(
-                            onPressed: vm.isVerifyingSubscription
-                                ? null
-                                : _verifySubscription,
-                            child: vm.isVerifyingSubscription
-                                ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : const Text('Verify'),
-                          ),
-                        ],
-                      ),
-                    ],
-                    if (vm.subscriptionError != null) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        vm.subscriptionError!,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.error,
+                    Icon(
+                      Icons.construction,
+                      size: 18,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Premium subscriptions coming soon.',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
-                    ],
+                    ),
                   ],
                 ),
               ),

@@ -90,17 +90,11 @@ void main() {
       expect(find.text('Floating Widget'), findsNothing);
     });
 
-    testWidgets('Subscribe button shown when not subscribed', (tester) async {
-      await tester.pumpWidget(_buildTestApp(subscribed: false));
+    testWidgets('Subscription section shows coming soon placeholder', (tester) async {
+      await tester.pumpWidget(_buildTestApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('Subscribe — \$5/month'), findsOneWidget);
-    });
-
-    testWidgets('Subscribe button absent when subscribed', (tester) async {
-      await tester.pumpWidget(_buildTestApp(subscribed: true));
-      await tester.pumpAndSettle();
-
+      expect(find.text('Premium subscriptions coming soon.'), findsOneWidget);
       expect(find.text('Subscribe — \$5/month'), findsNothing);
     });
 
