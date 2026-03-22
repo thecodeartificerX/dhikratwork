@@ -31,7 +31,7 @@
 	<key>SUFeedURL</key>
 	<string>https://raw.githubusercontent.com/thecodeartificerX/dhikratwork/main/appcast.xml</string>
 	<key>SUPublicEDKey</key>
-	<string>BASE64_PUBLIC_KEY_HERE</string>
+	<string>vPj53udj6pEMmagyBMw4OkwEWJNxcLO9D2s8gZqzqbU=</string>
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
 </dict>
