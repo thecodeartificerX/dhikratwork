@@ -8,12 +8,11 @@ A desktop dhikr counter that stays on your screen while you work. Track your dai
 
 > **Help wanted:** The donation system is not yet functional — the `SubscriptionService` is stubbed out and no payment integration exists. This is our highest-priority feature. If you have experience with Stripe, RevenueCat, or similar payment platforms in Flutter, we'd love your help. See [Donations & Payments on the roadmap](#donations--payments) and [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
 
-**Windows** &bull; **macOS** &bull; Open Source &bull; Donations go to charity
+**Windows** &bull; **macOS** &bull; Open Source &bull; Donations go to charity (coming soon)
 
 [<img src="https://img.shields.io/badge/Download_for_Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Download for Windows" height="40">](https://github.com/thecodeartificerX/dhikratwork/releases/latest)
 [<img src="https://img.shields.io/badge/Download_for_macOS-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Download for macOS" height="40">](https://github.com/thecodeartificerX/dhikratwork/releases/latest)
 
-*macOS build coming soon — requires a macOS contributor. Windows-only for now.*
 
 ---
 
