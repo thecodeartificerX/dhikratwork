@@ -209,6 +209,23 @@ git -C "$PROJECT_ROOT" pull origin main \
   || die "git pull failed. Resolve conflicts and retry."
 pass "Pulled latest main"
 
+# flutter pub get (triggered by git pull or IDE) changes LF→CRLF in generated config files.
+# These are false diffs with no real changes — restore them so the dirty-tree check passes.
+GENERATED_FALSE_DIFFS=(
+  "ios/Flutter/Debug.xcconfig"
+  "ios/Flutter/Release.xcconfig"
+  "macos/Flutter/Flutter-Debug.xcconfig"
+  "macos/Flutter/Flutter-Release.xcconfig"
+)
+for f in "${GENERATED_FALSE_DIFFS[@]}"; do
+  if git -C "$PROJECT_ROOT" diff --quiet -- "$f" 2>/dev/null; then
+    :
+  else
+    git -C "$PROJECT_ROOT" checkout -- "$f" 2>/dev/null && \
+      info "Restored false-diff generated file: $f"
+  fi
+done
+
 # Abort if the working tree has uncommitted changes — the script commits appcast.xml later
 # and a dirty tree would pollute that commit or cause the push to fail.
 DIRTY=$(git -C "$PROJECT_ROOT" status --porcelain 2>/dev/null)
