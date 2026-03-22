@@ -1,1 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>DhikrAtWork Changelog</title>
+    <link>https://github.com/thecodeartificerX/dhikratwork</link>
+    <description>Recent changes to DhikrAtWork</description>
+    <language>en</language>
 
+    <item>
+      <title>Version 0.1.0</title>
+      <pubDate>Sun, 23 Mar 2026 07:02:43 +0000</pubDate>
+      <sparkle:version>0.1.0</sparkle:version>
+      <sparkle:shortVersionString>0.1.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>12.0</sparkle:minimumSystemVersion>
+      <enclosure
+        url="https://github.com/thecodeartificerX/dhikratwork/releases/download/v0.1.0/DhikrAtWork-v0.1.0-macos-arm64.zip"
+        sparkle:version="0.1.0"
+        sparkle:shortVersionString="0.1.0"
+        type="application/octet-stream"
+        sparkle:edSignature="08HvOS6G/Wze7JMrRpN4Xiomh6rdTNTP+PI4arrmHvNTDljSrd06oZJIg3IawgVd77q2ZFKux4ewNbzHUEsnDg=="
+        length="21367144" />
+    </item>
+
+  </channel>
+</rss>

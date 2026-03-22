@@ -584,6 +584,11 @@ info "URL: https://github.com/${GITHUB_REPO}/releases/tag/${TAG}"
 # ---------------------------------------------------------------------------
 step_header "9d/9" "Committing appcast.xml to main"
 
+# flutter build re-dirties the generated config files — restore them before committing
+for f in "${GENERATED_FALSE_DIFFS[@]}"; do
+  git -C "$PROJECT_ROOT" checkout -- "$f" 2>/dev/null || true
+done
+
 git -C "$PROJECT_ROOT" add "$APPCAST"
 git -C "$PROJECT_ROOT" commit -m "chore: update appcast.xml for ${TAG}" \
   || die "git commit of appcast.xml failed."
