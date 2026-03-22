@@ -6,7 +6,9 @@
 
 A desktop dhikr counter that stays on your screen while you work. Track your daily adhkar, build streaks, and grow — one press at a time.
 
-**Windows** &bull; **macOS** &bull; Free &bull; Open Source
+> **Help wanted:** The donation system is not yet functional — the `SubscriptionService` is stubbed out and no payment integration exists. This is our highest-priority feature. If you have experience with Stripe, RevenueCat, or similar payment platforms in Flutter, we'd love your help. See [Donations & Payments on the roadmap](#donations--payments) and [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
+
+**Windows** &bull; **macOS** &bull; Open Source &bull; Donations go to charity
 
 [<img src="https://img.shields.io/badge/Download_for_Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Download for Windows" height="40">](https://github.com/thecodeartificerX/dhikratwork/releases/latest)
 [<img src="https://img.shields.io/badge/Download_for_macOS-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Download for macOS" height="40">](https://github.com/thecodeartificerX/dhikratwork/releases/latest)
@@ -40,7 +42,7 @@ Click expand to open the tabbed interface (700x500) with three tabs:
 - Achievement badges (9 milestones from first dhikr to 100-day streak)
 - Goal progress bars (daily, weekly, monthly targets)
 
-**Settings Tab** — Configure your hotkey, export data (JSON/CSV), manage subscription, and more.
+**Settings Tab** — Configure your hotkey, export data (JSON/CSV), manage your donation subscription, and more.
 
 ### System Tray
 
@@ -64,17 +66,43 @@ Add your own custom dhikrs with Arabic text, transliteration, translation, and o
 
 ---
 
-## Install
+## Download & Install
 
-### Download (Recommended)
+Download the latest release from the [GitHub Releases page](https://github.com/thecodeartificerX/dhikratwork/releases/latest).
 
-1. Go to the [latest release](https://github.com/thecodeartificerX/dhikratwork/releases/latest)
-2. Download the `.zip` for your platform
-3. Extract and run `dhikratwork.exe` (Windows) or `DhikrAtWork.app` (macOS)
+### Windows
 
-No installer needed. All data is stored locally in SQLite.
+1. Download `DhikrAtWork-vX.Y.Z-windows-x64.zip`
+2. Extract the zip — you will see `README.txt`, `Install.bat`, `DhikrAtWork.cer`, and `DhikrAtWork.msix`
+3. Right-click `Install.bat` and select **Run as Administrator**
+4. If Windows SmartScreen appears, click **More info** → **Run anyway**
+5. Follow the prompts — the installer imports the certificate and installs the app
+6. The app launches automatically after installation
 
-> **Note:** These builds are unsigned. Windows may show a SmartScreen warning on first launch — click "More info" then "Run anyway". On macOS, right-click the app and select "Open" to bypass Gatekeeper. Code signing certificates cost money; unsigned builds are functionally identical.
+After install, DhikrAtWork appears in your Start Menu and sets up automatic background update checks every 12 hours.
+
+### macOS
+
+1. Download `DhikrAtWork-vX.Y.Z-macos-arm64.zip`
+2. Extract the zip and drag `DhikrAtWork.app` to your **Applications** folder
+3. **Do not double-click to open** — right-click (or Control-click) `DhikrAtWork.app` and select **Open**
+4. Click **Open** in the Gatekeeper confirmation dialog
+5. This one-time step is only required on first launch
+
+After install, the app checks for updates automatically every 24 hours in the background.
+
+### Security & Trust
+
+DhikrAtWork is **free open-source software** distributed without paid code signing certificates. Paid certificates cost hundreds of dollars per year — skipping them keeps the project entirely free.
+
+You can verify the app yourself:
+- **Check SHA256 checksums** — each release includes `.sha256` files. Verify your download matches:
+  - Windows: `certutil -hashfile DhikrAtWork-vX.Y.Z-windows-x64.zip SHA256`
+  - macOS: `shasum -a 256 DhikrAtWork-vX.Y.Z-macos-arm64.zip`
+- **Scan on VirusTotal** — links to VirusTotal scan results are included in each release's notes
+- **Review the source code** — everything is in this repository; nothing is hidden
+
+The Windows installer imports a self-signed certificate (`DhikrAtWork.cer`, included in the zip and committed to this repo) into your Trusted Root store. This is required for MSIX installation and Windows auto-updates. If you prefer, you can inspect `Install.bat` before running it — it is a plain text file.
 
 ### Build From Source
 
@@ -148,10 +176,25 @@ Good first contributions: new preloaded adhkar, achievement ideas, translations,
 
 ---
 
+## Mission
+
+DhikrAtWork is built to do good in the world. The app is free to use, but each day before you start, you'll see a brief reminder about the humanitarian crisis in Palestine and Gaza — and an invitation to donate.
+
+A $5/month subscription removes the daily reminder. All donation revenue goes directly to charitable relief efforts. If you cancel, the reminders return. This is how we turn everyday dhikr into real-world impact.
+
+---
+
 ## Roadmap
 
-Some ideas for the future (contributions welcome!):
+### Donations & Payments
+- [ ] Daily donation interstitial — shown once per day on app launch, dismissable with "Not now"
+- [ ] $5/month subscription to remove the daily interstitial
+- [ ] Payment integration (Stripe or similar)
+- [ ] Subscription status synced with existing `SubscriptionService` interface
+- [ ] Pestering resumes if subscription is canceled
+- [ ] Transparency page — show how much has been raised and where it goes
 
+### Features
 - [ ] Linux support
 - [ ] Floating widget with multiple dhikr counters
 - [ ] Cloud sync across devices

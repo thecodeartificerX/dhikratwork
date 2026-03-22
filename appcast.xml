@@ -13,7 +13,7 @@
       <sparkle:shortVersionString>1.0.0</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>12.0</sparkle:minimumSystemVersion>
       <enclosure
-        url="https://github.com/thecodeartificerX/dhikratwork/releases/download/v1.0.0/DhikrAtWork.dmg"
+        url="https://github.com/thecodeartificerX/dhikratwork/releases/download/v1.0.0/DhikrAtWork-v1.0.0-macos-arm64.zip"
         sparkle:version="1.0.0"
         sparkle:shortVersionString="1.0.0"
         type="application/octet-stream"
