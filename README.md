@@ -22,6 +22,10 @@ DhikrAtWork runs as a slim, always-on-top counter bar that sits over your other 
 
 ### Compact Mode — Always-on-Top Counter
 
+<p align="center">
+  <img src="docs/screenshots/compacted_ui.png" alt="Compact Mode — Always-on-Top Counter Bar" width="80%">
+</p>
+
 A small frameless bar (520x100) that floats above everything. Drag it anywhere. Shows your active dhikr in Arabic, the session count, today's count, and your hotkey — all at a glance.
 
 - **Global hotkey** (default `Ctrl+Shift+D`) — count from any app without switching windows
@@ -29,6 +33,10 @@ A small frameless bar (520x100) that floats above everything. Drag it anywhere. 
 - **Drag anywhere** — position is remembered across sessions, clamped to screen edges on multi-monitor setups
 
 ### Expanded Mode — Full Interface
+
+<p align="center">
+  <img src="docs/screenshots/expanded_UI.png" alt="Expanded Mode — Full Tabbed Interface" width="60%">
+</p>
 
 Click expand to open the tabbed interface (700x500) with three tabs:
 
